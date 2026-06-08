@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kirchoff Affordable Housing Site Finder</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Google Maps Places — replace YOUR_KEY with your Google Cloud API key -->
+  <!-- Enable: Maps JavaScript API + Places API in Google Cloud Console -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places" async></script>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon">⌂</div>
+      <div>
+        <h1>Affordable Housing Site Finder</h1>
+        <p>Connecticut</p>
+      </div>
+    </div>
+
+    <div class="search-wrap">
+      <input id="searchInput" placeholder="Search by address, city, ZIP code, or property ID..." />
+      <button onclick="loadProperties()">Search</button>
+    </div>
+
+    <nav class="top-actions">
+      <!-- Add Property button — admin workflow: find on LoopNet, add here -->
+      <button class="ghost-action add-prop-btn" onclick="openAddPropertyModal()" title="Add a new property listing">+ Add Property</button>
+      <button class="ghost-action" onclick="openSavedPanel()">☆ Saved</button>
+      <button class="ghost-action" onclick="openStatsModal()" title="Database stats dashboard" style="background:#f0fdf4;border-color:#86efac;color:#15803d">📊 DB Stats</button>
+      <button class="ghost-action">🔔 <span class="badge">3</span></button>
+      <div class="profile-pill">
+        <span>PJ</span>
+        <div><b>Demo User</b><small>Acquisition Team</small></div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="app-shell">
+    <aside class="filters-card">
+      <div class="panel-header"><h2>FILTERS</h2><button onclick="resetFilters()">↻ Reset All</button></div>
+
+      <label>Location</label>
+      <input id="locationInput" class="filter-input" placeholder="Enter city, town, or ZIP code" />
+
+      <label>Price Range ($)</label>
+      <div class="two-col">
+        <input id="minPrice" class="filter-input" value="100000" />
+        <input id="maxPrice" class="filter-input" value="5000000" />
+      </div>
+
+      <label>Property Size (Acres)</label>
+      <div class="two-col">
+        <input id="minAcres" class="filter-input" value="0.5" />
+        <input id="maxAcres" class="filter-input" value="20" />
+      </div>
+
+      <label>Zoning Type</label>
+      <select id="zoningFilter" class="filter-input">
+        <option value="any">Any zoning type</option>
+        <option value="Residential">Residential</option>
+        <option value="Mixed Use">Mixed Use</option>
+        <option value="Commercial">Commercial</option>
+      </select>
+
+      <label>QCT / DDA Status</label>
+      <div class="segmented">
+        <button data-value="any" class="active" onclick="setSegment('qctFilter',this)">Any</button>
+        <button data-value="qct" onclick="setSegment('qctFilter',this)">QCT</button>
+        <button data-value="dda" onclick="setSegment('qctFilter',this)">DDA</button>
+        <button data-value="none" onclick="setSegment('qctFilter',this)">None</button>
+      </div>
+      <input type="hidden" id="qctFilter" value="any" />
+
+      <label>Terrain Slope</label>
+      <div class="terrain-grid">
+        <button data-value="any" class="active" onclick="setSegment('terrainFilter',this)">Any</button>
+        <button data-value="flat" onclick="setSegment('terrainFilter',this)">Flat<br><small>0-5%</small></button>
+        <button data-value="moderate" onclick="setSegment('terrainFilter',this)">Moderate<br><small>5-15%</small></button>
+        <button data-value="steep" onclick="setSegment('terrainFilter',this)">Steep<br><small>15%+</small></button>
+      </div>
+      <input type="hidden" id="terrainFilter" value="any" />
+
+      <label>Map Overlays</label>
+      <div class="overlay-list">
+        <label><span>QCT Areas</span><input id="qctLayerToggle" type="checkbox" checked onchange="toggleLayers()"></label>
+        <label><span>DDA Areas</span><input id="ddaLayerToggle" type="checkbox" checked onchange="toggleLayers()"></label>
+        <label><span>Flood Zones</span><input id="floodLayerToggle" type="checkbox" checked onchange="toggleLayers()"></label>
+        <label><span>Terrain / Slope</span><input id="terrainLayerToggle" type="checkbox" checked onchange="toggleLayers()"></label>
+      </div>
+
+      <button class="primary-wide" onclick="loadProperties()">Apply Filters</button>
+      <button class="secondary-wide" onclick="saveSearchDemo()">▱ Save Search</button>
+    </aside>
+
+    <section class="map-area">
+      <div class="overlay-tabs">
+        <button><span class="dot purple"></span>QCT Areas</button>
+        <button><span class="dot orange"></span>DDA Areas</button>
+        <button><span class="dot blue"></span>Flood Zones</button>
+        <button><span class="dot green"></span>Terrain (Slope)</button>
+        <!-- Map style switcher — always visible -->
+        <div style="margin-left:auto;display:flex;gap:5px;pointer-events:auto">
+          <button class="msc-btn active" onclick="setMapStyle('street',this)">🗺 Street</button>
+          <button class="msc-btn" onclick="setMapStyle('satellite',this)">🛰 Satellite</button>
+          <button class="msc-btn" onclick="setMapStyle('terrain',this)">⛰ Terrain</button>
+        </div>
+      </div>
+      <div id="map"></div>
+
+      <div class="results-card">
+        <div class="results-meta">
+          <span id="countLabel">Loading properties...</span>
+          <span>Last updated: May 24, 2026 10:30 AM</span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Address</th><th>City/Town</th><th>Price</th><th>Size</th>
+              <th>QCT/DDA</th><th>Utilities</th><th>Terrain</th>
+              <th>Feasibility</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="propertyRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <aside id="detailsPanel" class="details-card"></aside>
+  </main>
+
+  <div id="modalLayer" class="hidden"></div>
+  <div id="toast" class="toast hidden"></div>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
