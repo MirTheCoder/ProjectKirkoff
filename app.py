@@ -4,6 +4,10 @@ Three-tier: Browser (JS) → Flask (Python) → MongoDB
 
 Terminal shows every DB read/write in real time.
 """
+
+"""Here we are importing all the required modules to ensure that we can run our application on the web
+as well as make calls to our mongo database (this is where we can put in dummy data for now until we 
+start making actual API calls"""
 from flask import Flask, render_template, jsonify, request
 from pymongo import MongoClient, DESCENDING
 from pymongo.errors import DuplicateKeyError
@@ -11,25 +15,31 @@ from datetime import datetime
 import logging, threading, webbrowser, os
 
 # ── Logging — prints to terminal in real time ─────────────
+#Here we are establishing pythons basic logging function to set rules for what it should log in the terminal
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s  %(levelname)-5s  %(message)s",
-    datefmt="%H:%M:%S",
+    level=logging.INFO, #Tells our logging system to log only normal operations and to ignore minor debug issues
+    format="%(asctime)s  %(levelname)-5s  %(message)s", #Formats each logged message within the terminal to show
+    #The time of update or status, the kind of info being reported on, and the actual description of said process
+    datefmt="%H:%M:%S", #We only want the hour, minute, and second that this happens
 )
-log = logging.getLogger("kirchoff")
+log = logging.getLogger("kirchoff") #Lets the system know that this logger just applies to the Kirchhoff related code
 
-app = Flask(__name__)
+app = Flask(__name__) #Initates the backend web Server
 
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/")
 DB_NAME   = os.environ.get("MONGO_DB",  "kirchoff_db")
 _client   = None
 
+#This function will open up a connection to the database once a request to the databse has been made
+#We will also use this to keep that connection open and to reusue the database connection instead
+#of opening a new one everytime a request is made
 def get_db():
     global _client
     if _client is None:
-        _client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+        _client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000) #Mongo has 5 seconds to make a connection, or else it will throw an error
     return _client[DB_NAME]
 
+#Provides a function shortcut for each request to each collection that we have within our system
 def col_props():  return get_db().properties
 def col_notes():  return get_db().notes
 def col_saved():  return get_db().saved_properties
