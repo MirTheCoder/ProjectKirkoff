@@ -16,6 +16,7 @@ import time
 import requests
 from pathlib import Path
 
+#This will give us the location where we can store data, and if the location does not exist, then we will create it
 OUT = Path(__file__).parent / "static" / "data"
 OUT.mkdir(parents=True, exist_ok=True)
 
@@ -23,6 +24,9 @@ OUT.mkdir(parents=True, exist_ok=True)
 # Multiple candidate URLs tried in order — HUD occasionally renames services
 HUD_ORG  = "https://services.arcgis.com/VTyQ9soqVukalItT/arcgis/rest/services"
 
+
+#Here we have various url meshes to ensure that if one url link doesn't go through we can then try
+#a different candidate
 LAYERS = {
     "ct_qct": {
         "label": "Qualified Census Tracts (QCT)",
@@ -32,8 +36,8 @@ LAYERS = {
             f"{HUD_ORG}/SADDA_QCT_2024/FeatureServer/0/query",
             f"{HUD_ORG}/TDAT_AGOL/FeatureServer/0/query",
         ],
-        "where": "STUSAB='CT'",
-        "where_alt": "STATE_NAME='Connecticut'",
+        "where": "STUSAB='CT'", #Narrows geospatial data to just the places in connection
+        "where_alt": "STATE_NAME='Connecticut'", #Gives the full state name
     },
     "ct_dda": {
         "label": "Difficult Development Areas (DDA)",
@@ -43,27 +47,29 @@ LAYERS = {
             f"{HUD_ORG}/SADDA_DDA_2024/FeatureServer/0/query",
             f"{HUD_ORG}/TDAT_AGOL/FeatureServer/1/query",
         ],
-        "where": "STUSAB='CT'",
-        "where_alt": "STATE_NAME='Connecticut'",
+        "where": "STUSAB='CT'", #Narrows geospatial data to just the places in connection
+        "where_alt": "STATE_NAME='Connecticut'", #Gives the full state name
     },
 }
 
 
 def query_service(url: str, where: str) -> list | None:
     """Query one ArcGIS FeatureServer endpoint; paginate if needed. Returns features list or None."""
-    features = []
-    offset   = 0
+    features = [] #Where we will store our map data
+    offset   = 0 #
+
+    #We will keep requesting hud data until the hud data we receive is less than the requested threshold
     while True:
         try:
             r = requests.get(url, params={
                 "where":             where,
-                "outFields":         "*",
+                "outFields":         "*", #Gives us all available data columns
                 "returnGeometry":    "true",
-                "outSR":             "4326",
-                "f":                 "geojson",
+                "outSR":             "4326", #Tells our source to send back coordinates as latitude and longitude
+                "f":                 "geojson", #Ask the hud source to return geo data as clean JSON info
                 "resultOffset":      offset,
-                "resultRecordCount": 1000,
-            }, timeout=25)
+                "resultRecordCount": 1000, #asking for a chunk of 1,000 items
+            }, timeout=25) #Request will hang for 25 seconds before ending attempt to connect instead of waiting forever
         except requests.RequestException as exc:
             print(f"    ✗ Request failed: {exc}")
             return None
@@ -84,11 +90,12 @@ def query_service(url: str, where: str) -> list | None:
             return None
 
         batch = data.get("features", [])
-        features.extend(batch)
+        features.extend(batch) #Appends all the geometric data to our features dictionary or array
         if len(batch) < 1000:
             break
         offset += 1000
-        time.sleep(0.25)
+        time.sleep(0.5) #Creates a cooldown time in between each request to ensure that we don't
+        #get caught rapid fire requesting from the hud system
 
     return features if features else None
 
@@ -96,9 +103,11 @@ def query_service(url: str, where: str) -> list | None:
 def fetch_layer(name: str, cfg: dict) -> bool:
     """Try each candidate URL until one returns data. Save GeoJSON. Return success."""
     print(f"\n{'─'*55}")
-    print(f"Fetching {cfg['label']} for Connecticut…")
+    print(f"Fetching {cfg['label']} for Connecticut…") #Tells us which federal dataset we are trying to download
 
+    #Pulls all possible url endpoints that you have in your configuration file to test and see which one works
     for url in cfg["candidates"]:
+        #Cleans up url to make it easier to read and also ensures that the print statement adds a result status right next to the url that was tried so that we can know if it worked or not
         short = url.split("/arcgis/")[0].split("/")[-1] + "/" + url.split("FeatureServer")[1]
         print(f"  Trying …{short} ", end="", flush=True)
 
