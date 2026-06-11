@@ -7,9 +7,19 @@ seed.py  —  run once to load data/db.json into MongoDB
 After seeding, start the app normally:  python app.py
 """
 import json
+import os
 from pathlib import Path
 from pymongo import MongoClient, ASCENDING
 from pymongo.errors import ConnectionFailure
+
+#We are gonna keep all of our uri and databse name keys within our environment variables for safety purposes
+MONGO_URI = os.environ.get("MONGO_URI")
+DB_NAME   = os.environ.get("DB_NAME")
+
+#Check to see if our code successfully extracted the values for the variable names stored within our environment
+print(MONGO_URI)
+print(DB_NAME)
+
 
 MONGO_URI = "mongodb://localhost:27017/"
 DB_NAME   = "kirchoff_db"
@@ -17,7 +27,7 @@ DB_NAME   = "kirchoff_db"
 def seed():
     # ── connect ──────────────────────────────────────
     try:
-        client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=3000)
+        client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=3000) #Has three seconds to connect to the mongodb server
         client.admin.command("ping")          # raises if MongoDB isn't running
     except ConnectionFailure:
         print("✗  Could not connect to MongoDB at", MONGO_URI)
@@ -27,15 +37,21 @@ def seed():
     db = client[DB_NAME]
 
     # ── load JSON ─────────────────────────────────────
-    data_file = Path(__file__).parent / "data" / "db.json"
-    with open(data_file, "r", encoding="utf-8") as f:
-        src = json.load(f)
+    try:
+        data_file = Path(__file__).parent / "data" / "db.json"
+        with open(data_file, "r", encoding="utf-8") as f:
+            src = json.load(f)
+    except FileNotFoundError:
+        print("Couldn't find data file")
+
 
     # ── seed each collection ──────────────────────────
     for col_name in ("properties", "notes", "saved_properties"):
         col   = db[col_name]
-        docs  = src.get(col_name, [])
+        docs  = src.get(col_name, []) #Retrieves all the JSON data under that column name
         col.drop()
+
+
         if docs:
             col.insert_many(docs)
             print(f"  ✓  {col_name}: inserted {len(docs)} documents")

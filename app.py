@@ -13,6 +13,9 @@ from pymongo import MongoClient, DESCENDING
 from pymongo.errors import DuplicateKeyError
 from datetime import datetime
 import logging, threading, webbrowser, os
+from flask_cors import CORS
+
+
 
 # ── Logging — prints to terminal in real time ─────────────
 #Here we are establishing pythons basic logging function to set rules for what it should log in the terminal
@@ -25,6 +28,7 @@ logging.basicConfig(
 log = logging.getLogger("kirchoff") #Lets the system know that this logger just applies to the Kirchhoff related code
 
 app = Flask(__name__) #Initates the backend web Server
+CORS(app) #This will allow our front and backend to communicate smoothly
 
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/")
 DB_NAME   = os.environ.get("MONGO_DB",  "kirchoff_db")
@@ -397,4 +401,4 @@ def open_browser():
 if __name__ == "__main__": #Run only if launched from this terminal
     _startup_log()
     threading.Timer(1.0, open_browser).start()
-    app.run(debug=False, host="127.0.0.1", port=5000)
+    app.run(debug=True, host="127.0.0.1", port=5000)

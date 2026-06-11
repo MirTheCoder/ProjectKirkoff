@@ -1,0 +1,193 @@
+{
+    "properties": [
+        {
+            "property_id": "prop_9281a",
+            "address": "142 North Main St",
+            "city": "West Hartford",
+            "state": "CT",
+            "zip": "06107",
+            "price": 245000,
+            "size_acres": 1.25,
+            "property_type": "Land",
+            "zoning": "Residential",
+            "utilities": "Public Water, Public Sewer, Gas",
+            "terrain": "Flat (3%)",
+            "terrain_level": "flat",
+            "qct_status": "none",
+            "dda_status": false,
+            "fema_zone": "Zone X",
+            "feasibility_score": 85,
+            "lat": 41.7621,
+            "lng": -72.742,
+            "image_url": "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800",
+            "last_updated": "Jun 10, 2026 10:15 PM",
+            "zoning_details": null,
+            "demographics": null
+        },
+        {
+            "property_id": "prop_4732b",
+            "address": "85 Church St",
+            "city": "New Haven",
+            "state": "CT",
+            "zip": "06510",
+            "price": 620000,
+            "size_acres": 0.85,
+            "property_type": "Land",
+            "zoning": "Commercial",
+            "utilities": "All Utilities Underground",
+            "terrain": "Steep (18%)",
+            "terrain_level": "steep",
+            "qct_status": "dda",
+            "dda_status": true,
+            "fema_zone": "Zone AE",
+            "feasibility_score": 62,
+            "lat": 41.3082,
+            "lng": -72.9251,
+            "image_url": "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800",
+            "last_updated": "Jun 10, 2026 09:30 AM",
+            "zoning_details": null,
+            "demographics": null
+        },
+        {
+            "property_id": "prop_1049c",
+            "address": "412 Torrington Rd",
+            "city": "Litchfield",
+            "state": "CT",
+            "zip": "06759",
+            "price": 1250000,
+            "size_acres": 45.3,
+            "property_type": "Land",
+            "zoning": "Agricultural",
+            "utilities": "Well & Septic Required",
+            "terrain": "Moderate (8%)",
+            "terrain_level": "moderate",
+            "qct_status": "qct",
+            "dda_status": false,
+            "fema_zone": "Zone X",
+            "feasibility_score": 78,
+            "lat": 41.7481,
+            "lng": -73.1884,
+            "image_url": "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800",
+            "last_updated": "Jun 09, 2026 04:45 PM",
+            "zoning_details": null,
+            "demographics": null
+        },
+        {
+            "property_id": "prop_5521d",
+            "address": "12 Seaside Ave",
+            "city": "Stamford",
+            "state": "CT",
+            "zip": "06902",
+            "price": 495000,
+            "size_acres": 0.33,
+            "property_type": "Land",
+            "zoning": "Residential",
+            "utilities": "Public Water & Sewer",
+            "terrain": "Flat (3%)",
+            "terrain_level": "flat",
+            "qct_status": "none",
+            "dda_status": false,
+            "fema_zone": "Zone VE",
+            "feasibility_score": 45,
+            "lat": 41.0534,
+            "lng": -73.5387,
+            "image_url": "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800",
+            "last_updated": "Jun 10, 2026 11:02 AM",
+            "zoning_details": null,
+            "demographics": null
+        },
+        {
+            "property_id": "prop_3389e",
+            "address": "500 Industrial Pkwy",
+            "city": "Middletown",
+            "state": "CT",
+            "zip": "06457",
+            "price": 875000,
+            "size_acres": 12.1,
+            "property_type": "Land",
+            "zoning": "Industrial",
+            "utilities": "Heavy Power, Public Water",
+            "terrain": "Moderate (8%)",
+            "terrain_level": "moderate",
+            "qct_status": "dda",
+            "dda_status": true,
+            "fema_zone": "Zone X",
+            "feasibility_score": 91,
+            "lat": 41.5623,
+            "lng": -72.6506,
+            "image_url": "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800",
+            "last_updated": "Jun 08, 2026 01:15 PM",
+            "zoning_details": null,
+            "demographics": null
+        }
+    ],
+    "notes": [
+        {
+            "note_id": "note_001",
+            "user_id": "demo_user_001",
+            "property_id": "prop_9281a",
+            "note": "Spoke with the zoning board. Setbacks are 25 feet for residential builds here. Highly feasible.",
+            "created_at": "Jun 10, 2026 02:30 PM"
+        },
+        {
+            "note_id": "note_002",
+            "user_id": null,
+            "property_id": "prop_4732b",
+            "note": "Steep slope will require retaining walls. Need to compute engineering and grading costs.",
+            "created_at": "Jun 10, 2026 03:15 PM"
+        },
+        {
+            "note_id": "note_003",
+            "user_id": "demo_user_001",
+            "property_id": "prop_1049c",
+            "note": "Massive parcel. Soil testing scheduled for next Tuesday to check septic compatibility.",
+            "created_at": "Jun 10, 2026 04:00 PM"
+        },
+        {
+            "note_id": "note_004",
+            "user_id": null,
+            "property_id": "prop_5521d",
+            "note": "Flood zone VE might heavily push up insurance premiums. Verify coastal building restrictions.",
+            "created_at": "Jun 10, 2026 05:20 PM"
+        },
+        {
+            "note_id": "note_005",
+            "user_id": "demo_user_001",
+            "property_id": "prop_3389e",
+            "note": "Excellent accessibility for industrial vehicles. Pre-approved for manufacturing use.",
+            "created_at": "Jun 10, 2026 06:10 PM"
+        }
+    ],
+    "saved_properties": [
+        {
+            "save_id": "save_001",
+            "user_id": "demo_user_001",
+            "property_id": "prop_9281a",
+            "saved_at": "Jun 10, 2026 01:05 PM"
+        },
+        {
+            "save_id": "save_002",
+            "user_id": "demo_user_001",
+            "property_id": "prop_1049c",
+            "saved_at": "Jun 10, 2026 01:10 PM"
+        },
+        {
+            "save_id": "save_003",
+            "user_id": "demo_user_001",
+            "property_id": "prop_3389e",
+            "saved_at": "Jun 10, 2026 01:15 PM"
+        },
+        {
+            "save_id": "save_004",
+            "user_id": "demo_user_001",
+            "property_id": "prop_4732b",
+            "saved_at": "Jun 10, 2026 01:22 PM"
+        },
+        {
+            "save_id": "save_005",
+            "user_id": "demo_user_001",
+            "property_id": "prop_5521d",
+            "saved_at": "Jun 10, 2026 01:30 PM"
+        }
+    ]
+}

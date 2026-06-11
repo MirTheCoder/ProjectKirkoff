@@ -35,3 +35,43 @@ If it does not open automatically, copy that link into Chrome or Edge.
 The demo uses `data/db.json` as a local NoSQL-style database so the presentation runs easily.
 For a production version, the same structure can map to Firebase Firestore collections:
 `properties`, `notes`, `saved_properties`, `users`, `hud_data`, and `property_images`.
+
+
+## Requirements
+- Make sure you have nodejs installed in order to properly use the tailwind css
+- Then run this command to initialize a package management file
+```text
+npm init -y
+```
+
+-Next, install the tailwind CSS compiler library into your project workspace and make it a dependecy in your package.json file
+```text
+npm install -D tailwindcss@latest
+```
+
+- Next, you will run this code below to have tailwind actually read the rules in src.css and then create a css that follows the rules and fits the pages it is monitoring
+```text
+npx tailwindcss -i ./static/css/src.css -o ./static/css/style.css --watch
+```
+
+- If you have the npm version 7 or higher, make sure to add this to the script block within your package.json file so that it has the exact root to where the tailwind engine program is:
+`"build:css": "tailwindcss -i ./static/css/src.css -o ./static/css/style.css --watch"`
+- You also will need to run this code:
+```text
+npm install @tailwindcss/cli
+```
+- and then you can run this code to have tailwind begin to create the required css files
+```text
+npm run build:css
+```
+
+
+- If you have anything under version 7 for npm, then you don't have to worry and instead can run this commandin your terminal
+```text
+npx tailwindcss -i ./static/css/src.css -o ./static/css/style.css --watch
+```
+
+
+
+
+
