@@ -74,8 +74,12 @@ def get_property_filter():
     #Each line ask for a specific key value, and if it can't find a value for that key, then it will
     #just label it as any
     qct       = request.args.get("qct",     "any")
+    qct = qct.lower() #Doing this for the sake of matching the exact format of the key value in mongo
     terrain   = request.args.get("terrain", "any")
+    terrain = terrain.lower() #Doing this for the sake of matching the exact format of the key value in mongo
     zoning    = request.args.get("zoning",  "any")
+    zoning = zoning.lower() #Doing this for the sake of matching the exact format of the key value in mongo
+
     q         = request.args.get("q",       "").strip().lower()
 
     #We use the types to convert the string data we get from the url to its respective data type
