@@ -87,9 +87,9 @@ def get_property_filter():
     #Here we store all the data values we retrieved from the url into our query list, only storing the
     #data if there was something present in there
     query = {}
-    if qct     != "any": query["qct_status"]    = qct
-    if terrain != "any": query["terrain_level"] = terrain
-    if zoning  != "any": query["zoning"]        = {"$regex": f"^{zoning}$", "$options": "i"} #This will match the users input with data in our system, regardless of whether it be uppercase or lowercase
+    if qct.lower()     != "any": query["qct_status"]    = qct #Made sure to do .lower() to ensure that we don't face any camel case issues
+    if terrain.lower() != "any": query["terrain_level"] = terrain
+    if zoning.lower()  != "any": query["zoning"]        = {"$regex": f"^{zoning}$", "$options": "i"} #This will match the users input with data in our system, regardless of whether it be uppercase or lowercase
     price_q = {}
 
     #We will only add these values if they are found as arguments within our filters
@@ -119,6 +119,7 @@ def get_property_filter():
 
     #Gives us an update and summary of the filtering process
     log.info(f"READ   MongoDB.properties  │ filters: {filter_str}  │ → {len(results)} docs returned")
+    print(results) #Testing to see if results does come back with results =)
     return jsonify(results)
 
 
