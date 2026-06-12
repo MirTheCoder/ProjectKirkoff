@@ -13,7 +13,6 @@ from pymongo import MongoClient, DESCENDING
 from pymongo.errors import DuplicateKeyError
 from datetime import datetime
 import logging, threading, webbrowser, os
-from flask_cors import CORS
 
 
 
@@ -28,7 +27,6 @@ logging.basicConfig(
 log = logging.getLogger("kirchoff") #Lets the system know that this logger just applies to the Kirchhoff related code
 
 app = Flask(__name__) #Initates the backend web Server
-CORS(app) #This will allow our front and backend to communicate smoothly
 
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/")
 DB_NAME   = os.environ.get("MONGO_DB",  "kirchoff_db")
@@ -69,9 +67,9 @@ def index():
     return render_template("index.html")
 
 
-#Route used to gain the properties from the database
-@app.get("/api/properties")
-def get_properties():
+#Route used to gain the properties from the databasebased off the useers
+@app.get("/api/propertyFilter")
+def get_property_filter():
     #We use the request.args.get to get the data passed in the url
     #Each line ask for a specific key value, and if it can't find a value for that key, then it will
     #just label it as any
@@ -93,6 +91,8 @@ def get_properties():
     if terrain != "any": query["terrain_level"] = terrain
     if zoning  != "any": query["zoning"]        = {"$regex": f"^{zoning}$", "$options": "i"} #This will match the users input with data in our system, regardless of whether it be uppercase or lowercase
     price_q = {}
+
+    #We will only add these values if they are found as arguments within our filters
     if min_price: price_q["$gte"] = min_price
     if max_price: price_q["$lte"] = max_price
     if price_q:   query["price"]  = price_q
@@ -119,6 +119,38 @@ def get_properties():
 
     #Gives us an update and summary of the filtering process
     log.info(f"READ   MongoDB.properties  │ filters: {filter_str}  │ → {len(results)} docs returned")
+    return jsonify(results)
+
+
+@app.get("/api/propertySearch")
+def get_property_search():
+
+    #This will get us the address that the user has inputted into the search bar
+    q         = request.args.get("q",       "").strip().lower()
+
+
+    #This will return to us all the property listings
+    results = list(col_props().find({}, NO_ID))
+
+    #Here we are essntially taking the address provided by the user and checking to see how many
+    #properties contain all those words within their full address. If they do, they will be rendered
+    #as an option
+    if q:
+        terms = q.split()
+        results = [p for p in results if all(
+            t in f"{p.get('property_id','')} {p.get('address','')} {p.get('city','')} {p.get('zip','')}".lower()
+            for t in terms)]
+
+    #This will log the address that the user used to search for properties
+    filter_str = q or "none"
+
+    #Gives us an update and summary of the filtering process
+    log.info(f"READ   MongoDB.properties  │ filters: {filter_str}  │ → {len(results)} docs returned")
+
+    #We will return an empty dictionary to show that no results match the users search valuee
+    if len(results) == 0:
+        return jsonify([])
+
     return jsonify(results)
 
 #Route used to add properties to our properties database
