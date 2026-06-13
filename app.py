@@ -30,6 +30,7 @@ app = Flask(__name__) #Initates the backend web Server
 
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/")
 DB_NAME   = os.environ.get("MONGO_DB",  "kirchoff_db")
+GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "") #This is our demo key that has limited usage per day
 _client   = None
 
 #This function will open up a connection to the database once a request to the databse has been made
@@ -64,7 +65,7 @@ def _ts():
 @app.route("/")
 def index():
     log.info("SERVE  index.html → browser")
-    return render_template("index.html")
+    return render_template("index.html", api_key=GOOGLE_API_KEY) #We are secretly passing the api key into our index page
 
 
 #Route used to gain the properties from the databasebased off the useers

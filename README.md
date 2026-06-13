@@ -66,10 +66,16 @@ npm run build:css
 ```
 
 
-- If you have anything under version 7 for npm, then you don't have to worry and instead can run this commandin your terminal
+- If you have anything under version 7 for npm, then you don't have to worry and instead can run this commanding your terminal
 ```text
 npx tailwindcss -i ./static/css/src.css -o ./static/css/style.css --watch
 ```
+
+## API DEMO KEY
+
+- Use this link to obtain the demo key (with limited usages) in order to test out the Google Maps api for the project:
+https://developers.google.com/maps/documentation/javascript/demo-key
+- This link also provides tutorials on how to incorporate the api calls for the Google Maps api along with how to implement their maps
 
 
 
