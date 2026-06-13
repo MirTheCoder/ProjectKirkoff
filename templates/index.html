@@ -4,9 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kirchoff Affordable Housing Site Finder</title>
+  <!-- Sets up digital connection to the Google servers in order to pull the font over for usage-->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- This actually loads the font into our system to be able to use it-->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- This handles the creation of the map and the interactiveness with the map, allowing users to move around the map and zoom it plus zoom out-->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <!-- Be sure to include 'loading=async' in your Google Maps urls so that it loads the google files optimally without hindering your page rendering-->
@@ -299,8 +302,7 @@
         </div>
         <!-- We will have the map displayed here and center it at Hartford CT-->
         <div id="map" class="h-full w-full z-10">
-          <!-- This creates for us a map that is centered at East Berlin Connecticut (roughly the center of Connecticut)-->
-          <gmp-map center="41.6150, -72.7112" zoom="13" map-id="DEMO_MAP_ID" style="height: 400px"></gmp-map>
+
         </div>
       </div>
 

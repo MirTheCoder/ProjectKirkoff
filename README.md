@@ -71,12 +71,21 @@ npm run build:css
 npx tailwindcss -i ./static/css/src.css -o ./static/css/style.css --watch
 ```
 
-## API DEMO KEY
+## API DEMO KEY/MAPS
 
 - Use this link to obtain the demo key (with limited usages) in order to test out the Google Maps api for the project:
 https://developers.google.com/maps/documentation/javascript/demo-key
 - This link also provides tutorials on how to incorporate the api calls for the Google Maps api along with how to implement their maps
 
+
+-We also have leaflet as well, and here is the link to their open source that explains exactly how to use it:
+https://leafletjs.com/
+
+-We also use this websites map tiles to give our leaflet a background to draw our map on, plus giving attribute to ensure that we give credit back to the website:
+https://cloud.maptiler.com/maps/streets-v4/
+
+-Here is a YouTube link that shows how to use leaflet in conjunction with maptiler:
+https://www.youtube.com/watch?v=wVnimcQsuwk&list=PLGHe6Moaz52PUNP4DtIshALDogSURIlYB
 
 
 

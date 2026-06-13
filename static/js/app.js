@@ -7,6 +7,9 @@ let resetFilterForm = document.getElementById('FilterReset')
 let closeOverlay1 = document.getElementById('closeOverlayProperty')
 let overlayProperty = document.getElementById('overlayProperty')
 
+//Using this to create our free map which will be centered at east berlin CT
+    const map = L.map('map').setView([41.6150, -72.7112], 15);
+
 //We will load all the properties that we have once the page loads and renders itself
 document.addEventListener('DOMContentLoaded', async () => {
     const response = await fetch('/api/propertySearch', {
@@ -19,6 +22,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if(overlayProperty && overlayProperty.classList.contains('active')){ //This is to check if the overlay is already active and visible on the page
             overlay.classList.remove('active'); //This will make the overlay invisible on the page
     }
+
+    L.tileLayer('https://api.maptiler.com/maps/streets-v4/{z}/{x}/{y}.png?key=PYjzqRSFEwN74Wyenzcs', {
+        attribution: `<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>` //Make sure to add this in order to give credit to the website "cloud.maptiler.com"
+    }).addTo(map)
 
 })
 
@@ -161,6 +168,9 @@ async function showProperties(data){
 
 
             tableRowData.appendChild(row)
+
+            //We will use this to mark the property on the map
+            let marker = L.marker([prop.lat, prop.lng]).addTo(map);
 
         });
     }
