@@ -78,6 +78,8 @@ https://developers.google.com/maps/documentation/javascript/demo-key
 - This link also provides tutorials on how to incorporate the api calls for the Google Maps api along with how to implement their maps
 
 
+## HELPFUL WEBSITES FOR API DOCUMENTATION AND EXPLANATION
+
 -We also have leaflet as well, and here is the link to their open source that explains exactly how to use it:
 https://leafletjs.com/
 
@@ -87,6 +89,9 @@ https://cloud.maptiler.com/maps/streets-v4/
 -Here is a YouTube link that shows how to use leaflet in conjunction with maptiler:
 https://www.youtube.com/watch?v=wVnimcQsuwk&list=PLGHe6Moaz52PUNP4DtIshALDogSURIlYB
 
+
+-Here is the link to the openapi documentation for the hud open source data:
+https://hudgis-hud.opendata.arcgis.com/datasets/77572a4428384d2697c476564dcf53f0_0/api
 
 
 

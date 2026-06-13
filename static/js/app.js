@@ -10,6 +10,10 @@ let overlayProperty = document.getElementById('overlayProperty')
 //Using this to create our free map which will be centered at east berlin CT
     const map = L.map('map').setView([41.6150, -72.7112], 15);
 
+    //This will be used to create a layer group that will store our markers so that it will be easier to
+    //remove the markers
+    const layerGroup = L.layerGroup().addTo(map)
+
 //We will load all the properties that we have once the page loads and renders itself
 document.addEventListener('DOMContentLoaded', async () => {
     const response = await fetch('/api/propertySearch', {
@@ -26,6 +30,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     L.tileLayer('https://api.maptiler.com/maps/streets-v4/{z}/{x}/{y}.png?key=PYjzqRSFEwN74Wyenzcs', {
         attribution: `<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>` //Make sure to add this in order to give credit to the website "cloud.maptiler.com"
     }).addTo(map)
+
+    await getQCTCoordinates()
 
 })
 
@@ -50,6 +56,8 @@ async function resetFilter(){
 FilterForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     let formObj = new FormData(FilterForm);
+    //This will clear all the markers from
+    layerGroup.clearLayers();
 
 //This is where we collect the fields the user is given to fill out for the filter form
 const queryParams = {
@@ -90,6 +98,9 @@ let url = `/api/propertyFilter?${searchParams.toString()}`;
 })
 
 async function loadProperties() {
+    //This will clear all the markers from
+    layerGroup.clearLayers();
+
     //This will get us the address that the user has inputted into the search bar
     let searchValue = encodeURIComponent(searchBox.value.trim()); //Gets
 
@@ -169,8 +180,8 @@ async function showProperties(data){
 
             tableRowData.appendChild(row)
 
-            //We will use this to mark the property on the map
-            let marker = L.marker([prop.lat, prop.lng]).addTo(map);
+            //We will use this to mark the property on the map by adding it to the layerGroup
+            let marker = L.marker([prop.lat, prop.lng]).addTo(layerGroup);
 
         });
     }
@@ -189,4 +200,14 @@ async function openAddPropertyModal(){
             overlayProperty.classList.remove('active')
         )
     }
+}
+
+//Using this to test run and see if our HUD Data query works
+async function getQCTCoordinates(){
+    url = `/api/getQCT`;
+    const response = await fetch(url, {
+            method: 'GET',
+        });
+
+        const data = await response.json();
 }

@@ -24,6 +24,9 @@ OUT.mkdir(parents=True, exist_ok=True)
 # Multiple candidate URLs tried in order — HUD occasionally renames services
 HUD_ORG  = "https://services.arcgis.com/VTyQ9soqVukalItT/arcgis/rest/services"
 
+#This will be our url for getting QCT geographical points in order to plot them on our map
+QCT_URL  = "https://services.arcgis.com/VTyQ9soqVukalItT/ArcGIS/rest/services/QUALIFIED_CENSUS_TRACTS_2026/FeatureServer/0/query"
+
 
 #Here we have various url meshes to ensure that if one url link doesn't go through we can then try
 #a different candidate
@@ -129,6 +132,56 @@ def fetch_layer(name: str, cfg: dict) -> bool:
     print(f"    https://www.huduser.gov/portal/sadda/sadda_qct.html")
     print(f"    then convert to GeoJSON and save as static/data/{name}.geojson")
     return False
+
+#This is the function we will use for testing to query hud data in order to draw qct and dda areas within our map
+def fetchLayerQCT():
+    where = "STATE='09'" # Tells system that we are honing in on the state of Connecticut, 09 is the state code for Connecticut
+    url = QCT_URL
+    offset = 0
+    response = {"ok": False}
+    try:
+        # Here is where we make the actual request to the hud data open api
+        response = requests.get(url, params={
+            "where": where,
+            "outFields": "*",  # Gives us all available data columns
+            "returnGeometry": "true",
+            "outSR": "4326",  # Tells our source to send back coordinates as latitude and longitude
+            "f": "json",  # Ask the hud source to return geo data as clean JSON info
+            "resultOffset": offset, #Keeping it as 0 for demo practice purposes
+            "resultRecordCount": 100,  # asking for 50 items just to see how our computer handles the call
+        })
+    except Exception as e:
+        print("Error while trying to request HUD DATA: ", e)
+    finally:
+
+        if(response.status_code == 200):
+            return response.json()
+        else:
+            return {"ok": False}
+
+
+    print("hello")
+
+def fetchLayerDDA():
+    url = ""
+    where = "STATE_NAME='Connecticut'" #Tells system that we are honing in on the state of Connecticut
+    offset = 0
+
+    try:
+        #Here is where we make the actual request to the hud data open api
+        r = requests.get(url, params={
+            "where": where,
+            "outFields": "*",  # Gives us all available data columns
+            "returnGeometry": "true",
+            "outSR": "4326",  # Tells our source to send back coordinates as latitude and longitude
+            "f": "geojson",  # Ask the hud source to return geo data as clean JSON info
+            "resultOffset": offset,
+            "resultRecordCount": 1000,  # asking for a chunk of 1,000 items
+        }, timeout=25)  # Request will hang for 25 seconds before ending attempt to connect instead of waiting forever
+    except Exception as e:
+        print("Error whhile trying to request HUD DATA: ", e)
+
+    print("hello")
 
 
 def main():

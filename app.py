@@ -13,6 +13,7 @@ from pymongo import MongoClient, DESCENDING
 from pymongo.errors import DuplicateKeyError
 from datetime import datetime
 import logging, threading, webbrowser, os
+from fetch_hud_data import fetchLayerQCT
 
 
 
@@ -368,6 +369,22 @@ def save_feasibility_run():
     run.pop("_id", None)
     log.info(f"INSERT MongoDB.feas_runs   │ id={run_id}  property={property_id}  score={body.get('results',{}).get('score','?')}%")
     return jsonify({"ok": True, "run_id": run_id, "message": f"Feasibility run {run_id} saved."})
+
+@app.get('/api/getQCT')
+def get_qct():
+    #Calling this function in order to receive the first 100 qct areas in Connecticut
+    coordinates = fetchLayerQCT()
+
+    #This is our check to see if the call worked or not
+    if coordinates:
+        if coordinates.get("ok"):
+            print("Here are our coordinates results: ", coordinates)
+            return jsonify(coordinates)
+        else:
+            print("Here are our coordinates results: ", coordinates)
+            return jsonify({"ok": False})
+    else:
+        return jsonify({"ok": False})
 
 
 @app.get("/api/stats")
