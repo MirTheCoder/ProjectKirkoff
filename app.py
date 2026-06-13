@@ -377,14 +377,11 @@ def get_qct():
 
     #This is our check to see if the call worked or not
     if coordinates:
-        if coordinates.get("ok"):
-            print("Here are our coordinates results: ", coordinates)
-            return jsonify(coordinates)
-        else:
-            print("Here are our coordinates results: ", coordinates)
-            return jsonify({"ok": False})
+        print("Here are our coordinates results: ", coordinates)
+        return coordinates
     else:
-        return jsonify({"ok": False})
+        print("Here are our coordinates results: ", coordinates)
+        return {"ok": False}
 
 
 @app.get("/api/stats")

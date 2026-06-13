@@ -210,4 +210,22 @@ async function getQCTCoordinates(){
         });
 
         const data = await response.json();
+        //await displayQCTCoordinates(data.features)
+}
+
+//This will be the function we use to display the qct areas using their coordinates
+async function displayQCTCoordinates(points){
+    //This will hold all the qct areas
+    const QCTLayers = L.layerGroup().addTo(map)
+
+    points.forEach(geo => {
+        let pointArray = []
+        for (let [x, y] of points) {
+            pointArray.push([x,y])
+        }
+
+    })
+
+
+
 }
