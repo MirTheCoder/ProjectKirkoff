@@ -432,6 +432,8 @@ def _startup_log():
     except Exception as e:
         log.error(f"MongoDB connection failed: {e}")
 
+
+#For demo purposes, we may need to edit the code to ensure that the code doesn't auto refresh in order to preserve our api calls
 def open_browser():
     if os.environ.get("NO_BROWSER") == "1": return
     webbrowser.open_new("http://127.0.0.1:5000")
