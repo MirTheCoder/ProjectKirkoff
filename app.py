@@ -151,7 +151,7 @@ def get_property_search():
 
     #Gives us an update and summary of the filtering process
     log.info(f"READ   MongoDB.properties  │ filters: {filter_str}  │ → {len(results)} docs returned")
-
+    print(results) #Test run to see what we are gettin from this when we reset the filter form
     #We will return an empty dictionary to show that no results match the users search valuee
     if len(results) == 0:
         return jsonify([])
@@ -172,8 +172,8 @@ def add_property():
     qct     = data.get("qct_status",   "none")
     util    = data.get("utilities",    "")
 
-    #We used the recieved values from the property that is added to calculate a score fo it in terms
-    #of its fesability
+    #We used the received values from the property that is added to calculate a score fo it in terms
+    #of its feasibility
     score = 50
     if tlevel == "flat":                  score += 15
     elif tlevel == "steep":               score -= 22

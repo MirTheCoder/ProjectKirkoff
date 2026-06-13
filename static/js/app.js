@@ -2,9 +2,46 @@ let searchBox = document.getElementById('searchInput');
 let filterBox = document.getElementById('FilterSection')
 let url = ''
 let FilterForm = document.getElementById('FilterForm')
+let tableRowData = document.getElementById('propertyRows') //Where our properties will be displayed
+let resetFilterForm = document.getElementById('FilterReset')
+let closeOverlay1 = document.getElementById('closeOverlayProperty')
+let overlayProperty = document.getElementById('overlayProperty')
+
+//We will load all the properties that we have once the page loads and renders itself
+document.addEventListener('DOMContentLoaded', async () => {
+    const response = await fetch('/api/propertySearch', {
+            method: 'GET',
+        });
+
+        const data = await response.json();
+        await showProperties(data)
+
+    if(overlayProperty && overlayProperty.classList.contains('active')){ //This is to check if the overlay is already active and visible on the page
+            overlay.classList.remove('active'); //This will make the overlay invisible on the page
+    }
+
+})
 
 
-FilterForm.addEventListener('submit', async () => {
+
+//We will use this reset button to reset the data the user put within the form to default values along with rendering
+//all properties
+async function resetFilter(){
+    FilterForm.reset();
+
+    url = `/api/propertySearch`;
+    const response = await fetch(url, {
+            method: 'GET',
+        });
+
+        const data = await response.json();
+        await showProperties(data)
+
+};
+
+
+FilterForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
     let formObj = new FormData(FilterForm);
 
 //This is where we collect the fields the user is given to fill out for the filter form
@@ -32,7 +69,6 @@ for (const [key, value] of Object.entries(queryParams)) {
 // This will add all our search arguments or parameters to the get request
 let url = `/api/propertyFilter?${searchParams.toString()}`;
 
-console.log("Generated Fetch URL:", url);
 // Output will look like: /api/property?q=Hartford&minPrice=100000&zoning=Residential
     try{
         const response = await fetch(url, {
@@ -40,7 +76,7 @@ console.log("Generated Fetch URL:", url);
         });
 
         const data = await response.json();
-        console.log(data);
+        await showProperties(data)
     } catch(error){
         console.error("Error fetching properties:", error);
     }
@@ -63,8 +99,84 @@ async function loadProperties() {
         });
 
         const data = await response.json();
-        console.log(data); // Ready to use your data here!
+        await showProperties(data)
     } catch (error) {
         console.error("Error fetching properties:", error);
+    }
+}
+
+//This function will populate our rows with the properties that either match the users search or filter
+async function showProperties(data){
+    tableRowData.innerHTML = '' //Reset the table to nothing so that we can populate it according to the users search or query
+
+    //Checking to make sure that our data is in array format, else we will turn it into array format
+    //if(!data.isArray()){
+        //data = data.toArray()
+    //}
+
+    //Only want to populate the property table if we actually got results back for the users search or filter
+    if(data.length > 0){
+        data.forEach(prop => {
+            let row = document.createElement('tr')
+            let data1 = document.createElement('td')
+            let data2 = document.createElement('td')
+            let data3 = document.createElement('td')
+            let data4 = document.createElement('td')
+            let data5 = document.createElement('td')
+            let data6 = document.createElement('td')
+            let data7 = document.createElement('td')
+            let data8 = document.createElement('td')
+            let data9 = document.createElement('td')
+
+            data1.innerHTML = `${prop.address}`
+            data1.style.margin = 'auto';
+            row.appendChild(data1)
+            data2.innerHTML = `${prop.city}`
+            data2.style.margin = 'auto';
+            row.appendChild(data2)
+            data3.innerHTML = `$${prop.price}`
+            data3.style.margin = 'auto';
+            row.appendChild(data3)
+            data4.innerHTML = `${prop.size_acres}`
+            data4.style.margin = 'auto';
+            row.appendChild(data4)
+            data5.innerHTML = `${prop.qct_status}`
+            data5.style.margin = 'auto';
+            row.appendChild(data5)
+            data6.innerHTML = `${prop.utilities}`
+            data6.style.margin = 'auto';
+            row.appendChild(data6)
+            data7.innerHTML = `${prop.terrain}`
+            data7.style.margin = 'auto';
+            row.appendChild(data7)
+            data8.innerHTML = `${prop.feasibility_score}`
+            data8.style.margin = 'auto';
+            row.appendChild(data8)
+            data9.innerHTML = `<button id="DetailsButton"
+            data9.style.margin = 'auto';
+            class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-600 hover:bg-blue-500 active:scale-[0.97] text-white text-xs font-bold rounded-md border border-slate-950 shadow-[1px_1px_0px_0px_rgba(2,6,23,1)] hover:shadow-none hover:translate-x-[1px] hover:translate-y-[1px] focus:outline-none focus:ring-1 focus:ring-blue-400 focus:ring-offset-1 transition-all duration-150 cursor-pointer select-none">
+            See Details
+            </button>`
+            row.appendChild(data9)
+
+
+            tableRowData.appendChild(row)
+
+        });
+    }
+
+}
+
+//This will render the overlay page where users can add their property to the lisitng
+async function openAddPropertyModal(){
+    if(overlayProperty && !overlayProperty.classList.contains('active')){ //This is to check if the overlay is already active and visible on the page
+            overlayProperty.classList.add('active'); //This will make the overlay invisible on the page
+    }
+
+    //This will be used to close the overlay box that allows users to add property
+    if(closeOverlay1){
+        closeOverlay1.addEventListener('click', () =>
+            overlayProperty.classList.remove('active')
+        )
     }
 }

@@ -1,1 +1,40 @@
 @import "tailwindcss";
+
+/* Add any css rules of your own here */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    z-index: 1000;
+  }
+
+  .overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .popup {
+    background: white;
+    padding: 28px 32px;
+    border-radius: 14px;
+    width: 340px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    transform: scale(0.9);
+    transition: transform 0.25s ease;
+  }
+
+  .overlay.active .popup {
+    transform: scale(1);
+  }
+    .popup h3 {
+        margin-bottom: 16px;
+        font-size: 20px;
+        color: #5B3E2B;
+        text-align: center;
+    }
