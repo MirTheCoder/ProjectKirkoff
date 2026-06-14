@@ -14,7 +14,7 @@ from pymongo.errors import DuplicateKeyError
 from datetime import datetime
 import logging, threading, webbrowser, os
 from fetch_hud_data import fetchLayerQCT
-
+from fetch_hud_data import fetchLayerDDA
 
 
 # ── Logging — prints to terminal in real time ─────────────
@@ -111,7 +111,7 @@ def get_property_filter():
     #objectId
     results = list(col_props().find(query, NO_ID))
 
-    #Here we are essntially taking the address provided by the user and checking to see how many
+    #Here we are essentially taking the address provided by the user and checking to see how many
     #properties contain all those words within their full address. If they do, they will be rendered
     #as an option
     if q:
@@ -125,7 +125,6 @@ def get_property_filter():
 
     #Gives us an update and summary of the filtering process
     log.info(f"READ   MongoDB.properties  │ filters: {filter_str}  │ → {len(results)} docs returned")
-    print(results) #Testing to see if results does come back with results =)
     return jsonify(results)
 
 
@@ -153,7 +152,6 @@ def get_property_search():
 
     #Gives us an update and summary of the filtering process
     log.info(f"READ   MongoDB.properties  │ filters: {filter_str}  │ → {len(results)} docs returned")
-    print(results) #Test run to see what we are gettin from this when we reset the filter form
     #We will return an empty dictionary to show that no results match the users search valuee
     if len(results) == 0:
         return jsonify([])
@@ -370,6 +368,7 @@ def save_feasibility_run():
     log.info(f"INSERT MongoDB.feas_runs   │ id={run_id}  property={property_id}  score={body.get('results',{}).get('score','?')}%")
     return jsonify({"ok": True, "run_id": run_id, "message": f"Feasibility run {run_id} saved."})
 
+#This function will get us the qct area coordinates
 @app.get('/api/getQCT')
 def get_qct():
     #Calling this function in order to receive the first 100 qct areas in Connecticut
@@ -377,10 +376,20 @@ def get_qct():
 
     #This is our check to see if the call worked or not
     if coordinates:
-        print("Here are our coordinates results: ", coordinates)
         return coordinates
     else:
-        print("Here are our coordinates results: ", coordinates)
+        return {"ok": False}
+
+#This function will get us the dda area coordinates
+@app.get('/api/getDDA')
+def get_dda():
+    #Calling this function in order to receive the first 100 qct areas in Connecticut
+    coordinates = fetchLayerDDA()
+
+    #This is our check to see if the call worked or not
+    if coordinates:
+        return coordinates
+    else:
         return {"ok": False}
 
 
@@ -450,9 +459,9 @@ def _startup_log():
 #For demo purposes, we may need to edit the code to ensure that the code doesn't auto refresh in order to preserve our api calls
 def open_browser():
     if os.environ.get("NO_BROWSER") == "1": return
-    webbrowser.open_new("http://127.0.0.1:5000")
+    webbrowser.open_new("http://127.0.0.1:5001")
 
 if __name__ == "__main__": #Run only if launched from this terminal
     _startup_log()
     threading.Timer(1.0, open_browser).start()
-    app.run(debug=True, host="127.0.0.1", port=5000)
+    app.run(debug=True, host="127.0.0.1", port=5001)

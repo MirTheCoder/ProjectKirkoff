@@ -6,6 +6,8 @@ let tableRowData = document.getElementById('propertyRows') //Where our propertie
 let resetFilterForm = document.getElementById('FilterReset')
 let closeOverlay1 = document.getElementById('closeOverlayProperty')
 let overlayProperty = document.getElementById('overlayProperty')
+let detailPanel = document.getElementById('detailsPanel')
+let closeDetails = document.getElementById('closeDetails')
 
 //Using this to create our free map which will be centered at east berlin CT
     const map = L.map('map').setView([41.6150, -72.7112], 15);
@@ -13,6 +15,9 @@ let overlayProperty = document.getElementById('overlayProperty')
     //This will be used to create a layer group that will store our markers so that it will be easier to
     //remove the markers
     const layerGroup = L.layerGroup().addTo(map)
+
+    //This will hold all the qct areas
+    const QCTLayers = L.layerGroup().addTo(map)
 
 //We will load all the properties that we have once the page loads and renders itself
 document.addEventListener('DOMContentLoaded', async () => {
@@ -32,6 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }).addTo(map)
 
     await getQCTCoordinates()
+    await getDDACoordinates()
 
 })
 
@@ -171,10 +177,10 @@ async function showProperties(data){
             data8.style.margin = 'auto';
             row.appendChild(data8)
             data9.innerHTML = `<button id="DetailsButton"
-            data9.style.margin = 'auto';
             class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-600 hover:bg-blue-500 active:scale-[0.97] text-white text-xs font-bold rounded-md border border-slate-950 shadow-[1px_1px_0px_0px_rgba(2,6,23,1)] hover:shadow-none hover:translate-x-[1px] hover:translate-y-[1px] focus:outline-none focus:ring-1 focus:ring-blue-400 focus:ring-offset-1 transition-all duration-150 cursor-pointer select-none">
             See Details
             </button>`
+            data9.style.margin = 'auto';
             row.appendChild(data9)
 
 
@@ -182,6 +188,7 @@ async function showProperties(data){
 
             //We will use this to mark the property on the map by adding it to the layerGroup
             let marker = L.marker([prop.lat, prop.lng]).addTo(layerGroup);
+            detailButtonListener();
 
         });
     }
@@ -202,7 +209,7 @@ async function openAddPropertyModal(){
     }
 }
 
-//Using this to test run and see if our HUD Data query works
+//Our fetch call to backend to get the qct coordinates
 async function getQCTCoordinates(){
     url = `/api/getQCT`;
     const response = await fetch(url, {
@@ -210,22 +217,85 @@ async function getQCTCoordinates(){
         });
 
         const data = await response.json();
-        //await displayQCTCoordinates(data.features)
+        await displayQCTCoordinates(data.features)
+}
+
+//Our fetch call to backend to get the dda coordinates
+async function getDDACoordinates(){
+    url = `/api/getDDA`;
+    const response = await fetch(url, {
+            method: 'GET',
+        });
+
+        const data = await response.json();
+        await displayDDACoordinates(data.features)
 }
 
 //This will be the function we use to display the qct areas using their coordinates
-async function displayQCTCoordinates(points){
-    //This will hold all the qct areas
-    const QCTLayers = L.layerGroup().addTo(map)
+async function displayQCTCoordinates(features){
 
-    points.forEach(geo => {
+    features.forEach(feature => {
         let pointArray = []
-        for (let [x, y] of points) {
-            pointArray.push([x,y])
+    //Grabs all the coordinate points that make up that one qct area
+        points = feature['geometry']['rings'][0]
+
+        for([x,y] of points){
+            pointArray.push([y,x]) //The Leaflet system reads the lat and long in the reverse way that Hud API sends it, so we have to swap each coordinate
+        }
+
+        //We will add the points directly to the
+        let polygon1 = L.polygon(pointArray, {color: 'purple',
+            fillColor: '#9370DB',
+            fillOpacity: 0.5
+        }).addTo(QCTLayers);
+
+    })
+}
+
+//This will be the function we use to display the qct areas using their coordinates
+async function displayDDACoordinates(features){
+
+    features.forEach(feature => {
+        let pointArray = []
+    //Grabs all the coordinate points that make up that one qct area
+        points = feature['geometry']['rings'][0]
+
+        for([x,y] of points){
+            pointArray.push([y,x]) //The Leaflet system reads the lat and long in the reverse way that Hud API sends it, so we have to swap each coordinate
+        }
+
+        //We will add the points directly to the
+        let polygon2 = L.polygon(pointArray, {color: 'orange',
+            fillColor: '#FFA500',
+            fillOpacity: 0.5
+        }).addTo(QCTLayers);
+
+    })
+}
+
+//This will toggle our side view screen that will display the details of the property the user selects or clicks on
+async function detailButtonListener(){
+    if(document.querySelectorAll('#DetailsButton')){
+        let buttons = document.querySelectorAll('#DetailsButton')
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                if(detailPanel.classList.contains('hidden')){
+                    detailPanel.classList.remove('hidden');
+                    closeButtonListener()
+                }
+            })
+        })
+
+    }
+
+}
+
+//Using this to hide the detail panel of the close button is clicked
+async function closeButtonListener(){
+    closeDetails.addEventListener('click', () =>{
+        if(!detailPanel.classList.contains('hidden')){
+            detailPanel.classList.add('hidden')
         }
 
     })
-
-
-
 }
