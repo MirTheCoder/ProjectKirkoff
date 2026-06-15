@@ -22,7 +22,7 @@ OUT.mkdir(parents=True, exist_ok=True)
 
 # ── HUD ArcGIS REST services (VTyQ9soqVukalItT = HUD org on ArcGIS Online) ──
 # Multiple candidate URLs tried in order — HUD occasionally renames services
-HUD_ORG  = "https://services.arcgis.com/VTyQ9soqVukalItT/arcgis/rest/services"
+HUD_ORG  = "https://services.arcgis.com/VTyQ9soqVukalItT/arcgis/rest/services" #Leaving this url here in case we need to go back to the base services page to see the url to a service and the scopes pertaining to that service/info
 
 #This will be our url for getting QCT geographical points in order to plot them on our map
 QCT_URL  = "https://services.arcgis.com/VTyQ9soqVukalItT/ArcGIS/rest/services/QUALIFIED_CENSUS_TRACTS_2026/FeatureServer/0/query"
@@ -30,181 +30,82 @@ QCT_URL  = "https://services.arcgis.com/VTyQ9soqVukalItT/ArcGIS/rest/services/QU
 DDA_URL = "https://services.arcgis.com/VTyQ9soqVukalItT/ArcGIS/rest/services/Difficult_Development_Areas_2026/FeatureServer/0/query"
 
 
-#Here we have various url meshes to ensure that if one url link doesn't go through we can then try
-#a different candidate
-LAYERS = {
-    "ct_qct": {
-        "label": "Qualified Census Tracts (QCT)",
-        "candidates": [
-            f"{HUD_ORG}/QCT_2024/FeatureServer/0/query",
-            f"{HUD_ORG}/QCT_Current/FeatureServer/0/query",
-            f"{HUD_ORG}/SADDA_QCT_2024/FeatureServer/0/query",
-            f"{HUD_ORG}/TDAT_AGOL/FeatureServer/0/query",
-        ],
-        "where": "STUSAB='CT'", #Narrows geospatial data to just the places in connection
-        "where_alt": "STATE_NAME='Connecticut'", #Gives the full state name
-    },
-    "ct_dda": {
-        "label": "Difficult Development Areas (DDA)",
-        "candidates": [
-            f"{HUD_ORG}/DDA_2024/FeatureServer/0/query",
-            f"{HUD_ORG}/DDA_Current/FeatureServer/0/query",
-            f"{HUD_ORG}/SADDA_DDA_2024/FeatureServer/0/query",
-            f"{HUD_ORG}/TDAT_AGOL/FeatureServer/1/query",
-        ],
-        "where": "STUSAB='CT'", #Narrows geospatial data to just the places in connection
-        "where_alt": "STATE_NAME='Connecticut'", #Gives the full state name
-    },
-}
-
-
-def query_service(url: str, where: str) -> list | None:
-    """Query one ArcGIS FeatureServer endpoint; paginate if needed. Returns features list or None."""
-    features = [] #Where we will store our map data
-    offset   = 0 #
-
-    #We will keep requesting hud data until the hud data we receive is less than the requested threshold
-    while True:
-        try:
-            r = requests.get(url, params={
-                "where":             where,
-                "outFields":         "*", #Gives us all available data columns
-                "returnGeometry":    "true",
-                "outSR":             "4326", #Tells our source to send back coordinates as latitude and longitude
-                "f":                 "geojson", #Ask the hud source to return geo data as clean JSON info
-                "resultOffset":      offset,
-                "resultRecordCount": 1000, #asking for a chunk of 1,000 items
-            }, timeout=25) #Request will hang for 25 seconds before ending attempt to connect instead of waiting forever
-        except requests.RequestException as exc:
-            print(f"    ✗ Request failed: {exc}")
-            return None
-
-        if r.status_code != 200:
-            print(f"    ✗ HTTP {r.status_code}")
-            return None
-
-        try:
-            data = r.json()
-        except Exception:
-            print("    ✗ Response is not JSON")
-            return None
-
-        # ArcGIS returns {"error": ...} for invalid services
-        if "error" in data:
-            print(f"    ✗ ArcGIS error: {data['error'].get('message','unknown')}")
-            return None
-
-        batch = data.get("features", [])
-        features.extend(batch) #Appends all the geometric data to our features dictionary or array
-        if len(batch) < 1000:
-            break
-        offset += 1000
-        time.sleep(0.5) #Creates a cooldown time in between each request to ensure that we don't
-        #get caught rapid fire requesting from the hud system
-
-    return features if features else None
-
-
-def fetch_layer(name: str, cfg: dict) -> bool:
-    """Try each candidate URL until one returns data. Save GeoJSON. Return success."""
-    print(f"\n{'─'*55}")
-    print(f"Fetching {cfg['label']} for Connecticut…") #Tells us which federal dataset we are trying to download
-
-    #Pulls all possible url endpoints that you have in your configuration file to test and see which one works
-    for url in cfg["candidates"]:
-        #Cleans up url to make it easier to read and also ensures that the print statement adds a result status right next to the url that was tried so that we can know if it worked or not
-        short = url.split("/arcgis/")[0].split("/")[-1] + "/" + url.split("FeatureServer")[1]
-        print(f"  Trying …{short} ", end="", flush=True)
-
-        # Try primary WHERE clause, then alternate
-        for where in (cfg["where"], cfg["where_alt"]):
-            features = query_service(url, where)
-            if features is not None:
-                print(f"→ {len(features)} features ✓")
-                geojson = {"type": "FeatureCollection", "features": features}
-                out_path = OUT / f"{name}.geojson"
-                out_path.write_text(json.dumps(geojson), encoding="utf-8")
-                print(f"  Saved → {out_path}")
-                return True
-
-        print()  # newline after the failed attempt line
-
-    print(f"\n  ✗ Could not fetch {cfg['label']}.")
-    print(f"    Manual fallback: download shapefile from")
-    print(f"    https://www.huduser.gov/portal/sadda/sadda_qct.html")
-    print(f"    then convert to GeoJSON and save as static/data/{name}.geojson")
-    return False
-
 #This is the function we will use for testing to query hud data in order to draw qct and dda areas within our map
 def fetchLayerQCT():
-    where = "STATE='09'" # Tells system that we are honing in on the state of Connecticut, 09 is the state code for Connecticut
-    url = QCT_URL
+    QCTArray = []
     offset = 0
-    response = {"ok": False}
+    #We essentially create a loop that will keep requesting data until we get all the qct areas
+    while True:
+        where = "STATE='09'" # Tells system that we are honing in on the state of Connecticut, 09 is the state code for Connecticut
+        url = QCT_URL
+        response = {"ok": False}
 
 
-    try:
-        # Here is where we make the actual request to the hud data open api
-        response = requests.get(url, params={
-            "where": where,
-            "outFields": "*",  # Gives us all available data columns
-            "returnGeometry": "true",
-            "outSR": "4326",  # Tells our source to send back coordinates as latitude and longitude
-            "f": "json",  # Ask the hud source to return geo data as clean JSON info
-            "resultOffset": offset, #Keeping it as 0 for demo practice purposes
-            "resultRecordCount": 1000,  # asking for 10 items just to see how our computer handles the call
-        },)
-    except Exception as e:
-        print("Error while trying to request HUD DATA: ", e)
-    finally:
+        try:
+            # Here is where we make the actual request to the hud data open api
+            response = requests.get(url, params={
+                "where": where,
+                "outFields": "*",  # Gives us all available data columns
+                "returnGeometry": "true",
+                "outSR": "4326",  # Tells our source to send back coordinates as latitude and longitude
+                "f": "json",  # Ask the hud source to return geo data as clean JSON info
+                "resultOffset": offset, #Keeping it as 0 for demo practice purposes
+                "resultRecordCount": 50,  # asking for 50 items at a time
+            }, timeout=4) #Adding a cool down between request to ensure that we don't raise any red flags
+        except Exception as e:
+            print("Error while trying to request HUD DATA: ", e)
 
-        if(response.status_code == 200):
-            return response.json()
-        else:
-            return {"ok": False}
+
+        if response.status_code == 200:
+            response = response.json()
+            print("Here is the amount of responses we recieved", len(response["features"])) #We want to see how many records we are actually getting back
+            if(len(response["features"]) < 50):
+                #Want to only add to the Array if there is data within the array
+                if(len(response["features"]) > 0):
+                    QCTArray.extend(response)
+                break
+            else:
+                offset += 50
+                time.sleep(0.5)
+                QCTArray.extend(response["features"]) #We will add every batch of results to the QCTArray
+    return QCTArray
+
 
 def fetchLayerDDA():
-    where = "ZCTA5 LIKE '06%'" # Tells system that we are honing in on the state of Connecticut, 09 is the state code for Connecticut
-    url = DDA_URL
     offset = 0
-    response = {"ok": False}
+    DDAArray = []
 
-    try:
-        # Here is where we make the actual request to the hud data open api
-        response = requests.get(url, params={
-            "where": where,
-            "outFields": "*",  # Gives us all available data columns
-            "returnGeometry": "true",
-            "outSR": "4326",  # Tells our source to send back coordinates as latitude and longitude
-            "f": "json",  # Ask the hud source to return geo data as clean JSON info
-            "resultOffset": offset,  # Keeping it as 0 for demo practice purposes
-            "resultRecordCount": 1000,  # asking for 10 items just to see how our computer handles the call
-        }, )
-    except Exception as e:
-        print("Error while trying to request HUD DATA: ", e)
-    finally:
+    while True:
+        where = "ZCTA5 LIKE '06%'"  # Tells system that we are honing in on the state of Connecticut, 09 is the state code for Connecticut
+        url = DDA_URL
+        response = {"ok": False}
+        try:
+            # Here is where we make the actual request to the hud data open api
+            response = requests.get(url, params={
+                "where": where,
+                "outFields": "*",  # Gives us all available data columns
+                "returnGeometry": "true",
+                "outSR": "4326",  # Tells our source to send back coordinates as latitude and longitude
+                "f": "json",  # Ask the hud source to return geo data as clean JSON info
+                "resultOffset": offset,  # Keeping it as 0 for demo practice purposes
+                "resultRecordCount": 20,  # asking for 10 items just to see how our computer handles the call
+            }, timeout=4)
+        except Exception as e:
+            print("Error while trying to request HUD DATA: ", e)
 
-        if (response.status_code == 200):
-            return response.json()
-        else:
-            return {"ok": False}
-
-
-def main():
-    print("HUD 2024 QCT / DDA Data Fetcher — Connecticut")
-    print("=" * 55)
-
-    results = {name: fetch_layer(name, cfg) for name, cfg in LAYERS.items()}
-
-    print(f"\n{'='*55}")
-    print("Summary:")
-    for name, ok in results.items():
-        status = "✓  saved" if ok else "✗  not fetched (app uses placeholder shapes)"
-        print(f"  {name}.geojson  →  {status}")
-
-    if any(results.values()):
-        print("\nRestart app.py to load the real boundaries.")
-
-
-if __name__ == "__main__":
-    main()
+        if response.status_code == 200:
+            response = response.json()
+            print("DDA Response: ", response)
+            print("Here is the amount of responses we recieved",
+                    len(response["features"]))  # We want to see how many records we are actually getting back
+            if (len(response["features"]) < 20):
+                # Want to only add to the Array if there is data within the array
+                if (len(response["features"]) > 0):
+                    DDAArray.extend(response)
+                break
+            else:
+                offset += 20
+                time.sleep(0.5)
+                DDAArray.extend(response["features"])  # We will add every batch of results to the QCTArray
+    print("Here is our DDA Hud Data: ", DDAArray)
+    return DDAArray

@@ -334,9 +334,84 @@
       </div>
     </section>
 
-    <aside id="detailsPanel" class="w-96 bg-white border-l border-slate-200 shadow-xl transition-all hidden z-30">
-      <button id="closeDetails" type="button" style="background-color: red; color: white; " >Close</button>
-    </aside>
+    <aside id="detailsPanel" class="w-96 bg-white border-l border-slate-200 shadow-xl transition-all hidden z-30 flex flex-col h-full">
+  <div class="p-4 pb-0">
+    <img src="{{ url_for('static', filename='images/DefaultBuilding.jpeg') }}"
+         alt="Property Image"
+         class="w-full h-48 object-cover rounded-lg shadow-sm" />
+  </div>
+
+  <div class="p-6 flex-1 overflow-y-auto space-y-6">
+
+    <div>
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Location</span>
+      <h4 id="DetailAddress" class="text-xl font-bold text-slate-800 mt-1"></h4>
+    </div>
+
+    <hr class="border-slate-100" />
+
+    <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl">
+      <div>
+        <span class="block text-xs font-medium text-slate-500 uppercase">Price</span>
+        <p id="DetailPrice" class="text-lg font-bold text-emerald-600 mt-0.5"></p>
+      </div>
+      <div>
+        <span class="block text-xs font-medium text-slate-500 uppercase">Size (Acres)</span>
+        <p id="DetailSize" class="text-lg font-bold text-slate-800 mt-0.5"></p>
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <h5 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Property Details</h5>
+
+      <div class="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
+        <div>
+          <span class="block font-medium text-slate-500">Property Type</span>
+          <p id="DetailType" class="text-slate-800 font-semibold mt-0.5">-</p>
+        </div>
+        <div>
+          <span class="block font-medium text-slate-500">Zoning</span>
+          <p id="Zone" class="text-slate-800 font-semibold mt-0.5">-</p>
+        </div>
+        <div>
+          <span class="block font-medium text-slate-500">Terrain Slope</span>
+          <p id="Terrain" class="text-slate-800 mt-0.5">-</p>
+        </div>
+        <div>
+          <span class="block font-medium text-slate-500">Utilities</span>
+          <p id="DetailUtilities" class="text-slate-800 mt-0.5">-</p>
+        </div>
+        <div>
+          <span class="block font-medium text-slate-500">FEMA Zone</span>
+          <p id="DetailFema" class="text-slate-800 mt-0.5">-</p>
+        </div>
+        <div>
+          <span class="block font-medium text-slate-500">Feasibility Score</span>
+          <p id="DetailFeasibility" class="text-slate-800 font-semibold mt-0.5">-</p>
+        </div>
+      </div>
+    </div>
+
+    <hr class="border-slate-100" />
+
+    <div class="grid grid-cols-2 gap-4 text-xs">
+      <div>
+        <span class="block font-medium text-slate-400 uppercase">QCT/DDA Status</span>
+        <p id="QCT_DDA" class="text-slate-600 mt-0.5 font-medium">-</p>
+      </div>
+      <div>
+        <span class="block font-medium text-slate-400 uppercase">Last Updated</span>
+        <p id="DetailUpdated" class="text-slate-500 mt-0.5">-</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-end">
+    <button id="closeDetails" type="button" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium text-sm rounded-lg transition-colors cursor-pointer">
+      Close
+    </button>
+  </div>
+</aside>
   </main>
 
   <div id="modalLayer" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden"></div>

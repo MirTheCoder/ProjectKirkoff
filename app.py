@@ -66,7 +66,8 @@ def _ts():
 @app.route("/")
 def index():
     log.info("SERVE  index.html → browser")
-    return render_template("index.html", api_key=GOOGLE_API_KEY) #We are secretly passing the api key into our index page
+    #We will also send the url to the image within our system to our index.html page
+    return render_template("index.html", api_key=GOOGLE_API_KEY, img="/static/images/DefaultBuilding.jpeg") #We are secretly passing the api key into our index page
 
 
 #Route used to gain the properties from the databasebased off the useers
@@ -214,7 +215,7 @@ def add_property():
         "feasibility_score": score,
         "lat":            flt("lat", 41.63),
         "lng":            flt("lng", -72.75),
-        "image_url":      "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800",
+        "image_url":      "/static/images/DefaultBuilding.jpeg", #For now, we will use this building image stored in our system to test out image display
         "last_updated":   datetime.now().strftime("%b %d, %Y %I:%M %p"),
         "zoning_details": None,
         "demographics":   None,
@@ -376,7 +377,7 @@ def get_qct():
 
     #This is our check to see if the call worked or not
     if coordinates:
-        return coordinates
+        return jsonify(coordinates)
     else:
         return {"ok": False}
 
@@ -388,7 +389,7 @@ def get_dda():
 
     #This is our check to see if the call worked or not
     if coordinates:
-        return coordinates
+        return jsonify(coordinates)
     else:
         return {"ok": False}
 
@@ -450,7 +451,7 @@ def _startup_log():
         log.info(f"    saved_properties = {s} documents")
         log.info(f"    feasibility_runs = {r} documents")
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-        log.info("  Server   : http://127.0.0.1:5000")
+        log.info("  Server   : http://127.0.0.1:5001")
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     except Exception as e:
         log.error(f"MongoDB connection failed: {e}")

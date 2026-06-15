@@ -11,6 +11,7 @@ let closeDetails = document.getElementById('closeDetails')
 
 //Using this to create our free map which will be centered at east berlin CT
     const map = L.map('map').setView([41.6150, -72.7112], 15);
+    L.control.zoom({position: 'bottomright'}).addTo(map)
 
     //This will be used to create a layer group that will store our markers so that it will be easier to
     //remove the markers
@@ -153,6 +154,7 @@ async function showProperties(data){
             let data9 = document.createElement('td')
 
             data1.innerHTML = `${prop.address}`
+            data1.id = "add" //This will help su easily find the address of the property we want to view in detail
             data1.style.margin = 'auto';
             row.appendChild(data1)
             data2.innerHTML = `${prop.city}`
@@ -217,7 +219,8 @@ async function getQCTCoordinates(){
         });
 
         const data = await response.json();
-        await displayQCTCoordinates(data.features)
+        console.log(data) //Allows us to see how the data looks exactly
+        await displayQCTCoordinates(data)
 }
 
 //Our fetch call to backend to get the dda coordinates
@@ -228,15 +231,18 @@ async function getDDACoordinates(){
         });
 
         const data = await response.json();
-        await displayDDACoordinates(data.features)
+        console.log(data)
+        await displayDDACoordinates(data)
 }
 
 //This will be the function we use to display the qct areas using their coordinates
 async function displayQCTCoordinates(features){
 
-    features.forEach(feature => {
+    for(const feature of features){
         let pointArray = []
     //Grabs all the coordinate points that make up that one qct area
+    try{
+ //Will be used to ensure that we don't run into an error incase the fields we request aren't present
         points = feature['geometry']['rings'][0]
 
         for([x,y] of points){
@@ -248,29 +254,36 @@ async function displayQCTCoordinates(features){
             fillColor: '#9370DB',
             fillOpacity: 0.5
         }).addTo(QCTLayers);
+    } catch(err){
+        console.log('The results stopped here')
+        break
+    }
 
-    })
+    }
 }
 
 //This will be the function we use to display the qct areas using their coordinates
 async function displayDDACoordinates(features){
-
-    features.forEach(feature => {
+let count = 1
+    for(const feature of features) {
         let pointArray = []
     //Grabs all the coordinate points that make up that one qct area
-        points = feature['geometry']['rings'][0]
+        try{
+            points = feature['geometry']['rings'][0]
+            for([x,y] of points){
+                pointArray.push([y,x]) //The Leaflet system reads the lat and long in the reverse way that Hud API sends it, so we have to swap each coordinate
+            }
 
-        for([x,y] of points){
-            pointArray.push([y,x]) //The Leaflet system reads the lat and long in the reverse way that Hud API sends it, so we have to swap each coordinate
+            //We will add the points directly to the
+            let polygon2 = L.polygon(pointArray, {color: 'orange',
+                fillColor: '#FFA500',
+                fillOpacity: 0.5
+            }).addTo(QCTLayers);
+        } catch(err) {
+            console.log('Results stop here')
+            break;
         }
-
-        //We will add the points directly to the
-        let polygon2 = L.polygon(pointArray, {color: 'orange',
-            fillColor: '#FFA500',
-            fillOpacity: 0.5
-        }).addTo(QCTLayers);
-
-    })
+    }
 }
 
 //This will toggle our side view screen that will display the details of the property the user selects or clicks on
@@ -278,7 +291,10 @@ async function detailButtonListener(){
     if(document.querySelectorAll('#DetailsButton')){
         let buttons = document.querySelectorAll('#DetailsButton')
         buttons.forEach(button => {
-            button.addEventListener('click', () => {
+            button.addEventListener('click', async (e) => {
+                let tableData = e.target.closest('tr')
+                let propdata = tableData.querySelector("#add").value.trim() //This will get the specific address for the property that we want to view and look at
+                //await getPropViaAddress(propdata)
                 if(detailPanel.classList.contains('hidden')){
                     detailPanel.classList.remove('hidden');
                     closeButtonListener()
@@ -298,4 +314,16 @@ async function closeButtonListener(){
         }
 
     })
+}
+
+async function getPropViaAddress(propdata){
+    url = `/api/getQCT`;
+    const response = await fetch(url, {
+            method: 'GET',
+        });
+
+        const propData = await response.json();
+        await displayQCTCoordinates(data.features)
+
+
 }
