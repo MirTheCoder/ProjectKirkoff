@@ -33,9 +33,10 @@ MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/")
 DB_NAME   = os.environ.get("MONGO_DB",  "kirchoff_db")
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "") #This is our demo key that has limited usage per day
 _client   = None
+coordinatesUrl = f"https://maps.googleapis.com/maps/api/geocode/json" #This is our base url for querying coordinates that pertain to an address that is inputted
 
-#This function will open up a connection to the database once a request to the databse has been made
-#We will also use this to keep that connection open and to reusue the database connection instead
+#This function will open up a connection to the database once a request to the database has been made
+#We will also use this to keep that connection open and to reuse the database connection instead
 #of opening a new one everytime a request is made
 def get_db():
     global _client
@@ -160,11 +161,23 @@ def get_property_search():
     return jsonify(results)
 
 #Route used to add properties to our properties database
-@app.post("/api/properties")
+@app.post("/api/addProperties")
 def add_property():
     data = request.get_json(force=True) #We use this to make sure that flask parses the incoming payload as json
     def flt(k, d=0): return float(str(data.get(k) or d).replace("$","").replace(",","") or d) #This will convert the users text into raw decimal number notation by removing any unwanted characters. Else, it will revert to the value 0 if nothing is inputed
 
+    try:
+        #We will use this to get the lat and long of the newly added property
+        response = request.get(coordinatesUrl, params={
+            "address": data.get("address", ""),
+            "key": GOOGLE_API_KEY
+        }, timeout=5) #This will time out after 5 tries
+
+        if(response.status_code == 200):
+            result = response[0].geometry.location #This will get us the coordinates
+
+    except Exception as e:
+        print('Error getting coordinates: ', e)
     #We use this to assign an id to each property based off of the city it is in
     city    = data.get("city", "CT")
     code    = ''.join(c for c in city[:3].upper() if c.isalpha())
@@ -178,7 +191,7 @@ def add_property():
     score = 50
     if tlevel == "flat":                  score += 15
     elif tlevel == "steep":               score -= 22
-    if "All Public" in util:              score += 15
+    if "All Public" in util.lower():              score += 15
     elif "Not Available" in util:         score -= 20
 
     #Used to see if the property owner qualifies for low income housing tax credits
@@ -200,7 +213,8 @@ def add_property():
     prop = {
         "property_id":    prop_id,
         "address":        data.get("address", ""),
-        "city":           city, "state": "CT",
+        "city":           city,
+        "state": "CT",
         "zip":            data.get("zip", ""),
         "price":          int(flt("price")),
         "size_acres":     round(flt("size_acres"), 2),

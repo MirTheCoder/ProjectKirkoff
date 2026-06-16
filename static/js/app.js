@@ -21,9 +21,6 @@ let QCT_DDA = document.getElementById('QCT_DDA')
 let LastUpdated = document.getElementById('DetailUpdated')
 let DDA = document.getElementById('DDA')
 let addPropertyForm = document.getElementById('addProperty')
-let Geocoder;
-let AdvancedMarkerElement;
-let ControlPosition;
 
 const BACKEND_URL = 'http://127.0.0.1:5001'; //This assures that our code hits the correct port number
 
@@ -55,7 +52,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         attribution: `<a href="https://www.maptiler.com/copyright/" target="_blank">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">&copy; OpenStreetMap contributors</a>` //Make sure to add this in order to give credit to the website "cloud.maptiler.com"
     }).addTo(map)
 
-    initGeo()
     await getQCTCoordinates()
     await getDDACoordinates()
 
@@ -79,11 +75,19 @@ async function resetFilter(){
 
 };
 
-addPropertyForm.addEventListener('click', () => {
+//Thi function will help to save the property that a user saves
+addPropertyForm.addEventListener('submit', async (e) => {
      e.preventDefault();
-     let formObj = new FormData(FilterForm);
-     let addy = formObj.get('address')
-     let lat, long = getPropCoordinates(addy)
+     let formObj = new FormData(addPropertyForm);
+     url = `${BACKEND_URL}/api/addProperties`
+
+     const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: formObj
+        });
 })
 
 FilterForm.addEventListener('submit', async (e) => {
@@ -383,33 +387,5 @@ async function displayDetails(propData){
 }
 
 //Sets up variables to receive the required variables needed for turning addresses into lat and long coordinates on the map
-async function initGeo(){
-const [{ Geocoder }, { AdvancedMarkerElement }, { ControlPosition }] =
-        await Promise.all([
-            google.maps.importLibrary('geocoding'),
-            google.maps.importLibrary('marker'),
-            google.maps.importLibrary('core'),
-            google.maps.importLibrary('maps'),
-        ]);
-}
-
-//We will use this function to turn the address the user input into actual coordinates that we can plot on our map
-async function getPropCoordinates(address){
-    try{
-        const response = await geocoder.geocode(address);
-        const { results } = response;
-        let location = results[0].geometry.location
-        //Converting our response into actual lat and long coordinate positions
-        const latitude = location.lat();
-        const longitude = location.lng();
-        console.log("latitude: ", latitude, "longitude: ", longitude)
-        return [latitude, longitude]
-    } catch(err){
-        console.log("error getting lat and lon coordinates", err)
-    }
-
-}
-
-
 
 
