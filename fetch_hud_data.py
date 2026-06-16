@@ -58,7 +58,6 @@ def fetchLayerQCT():
 
         if response.status_code == 200:
             response = response.json()
-            print("Here is the amount of responses we recieved", len(response["features"])) #We want to see how many records we are actually getting back
             if(len(response["features"]) < 50):
                 #Want to only add to the Array if there is data within the array
                 if(len(response["features"]) > 0):
@@ -95,9 +94,6 @@ def fetchLayerDDA():
 
         if response.status_code == 200:
             response = response.json()
-            print("DDA Response: ", response)
-            print("Here is the amount of responses we recieved",
-                    len(response["features"]))  # We want to see how many records we are actually getting back
             if (len(response["features"]) < 20):
                 # Want to only add to the Array if there is data within the array
                 if (len(response["features"]) > 0):
@@ -107,5 +103,4 @@ def fetchLayerDDA():
                 offset += 20
                 time.sleep(0.5)
                 DDAArray.extend(response["features"])  # We will add every batch of results to the QCTArray
-    print("Here is our DDA Hud Data: ", DDAArray)
     return DDAArray

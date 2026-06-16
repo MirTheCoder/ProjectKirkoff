@@ -8,8 +8,22 @@ let closeOverlay1 = document.getElementById('closeOverlayProperty')
 let overlayProperty = document.getElementById('overlayProperty')
 let detailPanel = document.getElementById('detailsPanel')
 let closeDetails = document.getElementById('closeDetails')
+let propLocation = document.getElementById('DetailAddress')
+let propPrice = document.getElementById('DetailPrice')
+let propSize = document.getElementById('DetailSize')
+let propType = document.getElementById('DetailType')
+let propZone = document.getElementById('Zone')
+let propTerrain = document.getElementById('Terrain')
+let propUtilities = document.getElementById('DetailUtilities')
+let propFema = document.getElementById('DetailFema')
+let propFeasibility = document.getElementById('DetailFeasibility')
+let QCT_DDA = document.getElementById('QCT_DDA')
+let LastUpdated = document.getElementById('DetailUpdated')
+let DDA = document.getElementById('DDA')
 
-//Using this to create our free map which will be centered at east berlin CT
+const BACKEND_URL = 'http://127.0.0.1:5001'; //This assures that our code hits the correct port number
+
+//Using this to create our free map which will be centered at east berlin CT, these are the coordinates for berlin Connecticut
     const map = L.map('map').setView([41.6150, -72.7112], 15);
     L.control.zoom({position: 'bottomright'}).addTo(map)
 
@@ -22,7 +36,7 @@ let closeDetails = document.getElementById('closeDetails')
 
 //We will load all the properties that we have once the page loads and renders itself
 document.addEventListener('DOMContentLoaded', async () => {
-    const response = await fetch('/api/propertySearch', {
+    const response = await fetch(`${BACKEND_URL}/api/propertySearch`, {
             method: 'GET',
         });
 
@@ -49,7 +63,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function resetFilter(){
     FilterForm.reset();
 
-    url = `/api/propertySearch`;
+    url = `${BACKEND_URL}/api/propertySearch`;
     const response = await fetch(url, {
             method: 'GET',
         });
@@ -89,7 +103,7 @@ for (const [key, value] of Object.entries(queryParams)) {
 }
 
 // This will add all our search arguments or parameters to the get request
-let url = `/api/propertyFilter?${searchParams.toString()}`;
+let url = `${BACKEND_URL}/api/propertyFilter?${searchParams.toString()}`;
 
 // Output will look like: /api/property?q=Hartford&minPrice=100000&zoning=Residential
     try{
@@ -113,9 +127,9 @@ async function loadProperties() {
 
     //We will only add the q argument if the user has typed in a search value
     if(searchValue !== ''){
-        url = `/api/propertySearch?q=${searchValue}`;
+        url = `${BACKEND_URL}/api/propertySearch?q=${searchValue}`;
     } else {
-        url = `/api/propertySearch`;
+        url = `${BACKEND_URL}/api/propertySearch`;
     }
 
     try {
@@ -190,9 +204,9 @@ async function showProperties(data){
 
             //We will use this to mark the property on the map by adding it to the layerGroup
             let marker = L.marker([prop.lat, prop.lng]).addTo(layerGroup);
-            detailButtonListener();
 
         });
+        detailButtonListener();
     }
 
 }
@@ -213,7 +227,7 @@ async function openAddPropertyModal(){
 
 //Our fetch call to backend to get the qct coordinates
 async function getQCTCoordinates(){
-    url = `/api/getQCT`;
+    url = `${BACKEND_URL}/api/getQCT`;
     const response = await fetch(url, {
             method: 'GET',
         });
@@ -223,9 +237,11 @@ async function getQCTCoordinates(){
         await displayQCTCoordinates(data)
 }
 
+
+
 //Our fetch call to backend to get the dda coordinates
 async function getDDACoordinates(){
-    url = `/api/getDDA`;
+    url = `${BACKEND_URL}/api/getDDA`;
     const response = await fetch(url, {
             method: 'GET',
         });
@@ -234,6 +250,8 @@ async function getDDACoordinates(){
         console.log(data)
         await displayDDACoordinates(data)
 }
+
+
 
 //This will be the function we use to display the qct areas using their coordinates
 async function displayQCTCoordinates(features){
@@ -293,8 +311,8 @@ async function detailButtonListener(){
         buttons.forEach(button => {
             button.addEventListener('click', async (e) => {
                 let tableData = e.target.closest('tr')
-                let propdata = tableData.querySelector("#add").value.trim() //This will get the specific address for the property that we want to view and look at
-                //await getPropViaAddress(propdata)
+                let propdata = tableData.querySelector("#add").textContent.trim() //This will get the specific address for the property that we want to view and look at
+                await getPropViaAddress(propdata)
                 if(detailPanel.classList.contains('hidden')){
                     detailPanel.classList.remove('hidden');
                     closeButtonListener()
@@ -306,24 +324,50 @@ async function detailButtonListener(){
 
 }
 
+
 //Using this to hide the detail panel of the close button is clicked
 async function closeButtonListener(){
-    closeDetails.addEventListener('click', () =>{
-        if(!detailPanel.classList.contains('hidden')){
-            detailPanel.classList.add('hidden')
-        }
-
-    })
+        closeDetails.addEventListener('click', closeDetailPanel)
 }
 
+async function closeDetailPanel(){
+    if(!detailPanel.classList.contains('hidden')){
+        detailPanel.classList.add('hidden')
+    }
+    closeDetails.removeEventListener('click', closeDetailPanel)
+}
+
+
+
 async function getPropViaAddress(propdata){
-    url = `/api/getQCT`;
+    url = `${BACKEND_URL}/api/addressForProp?address=${propdata}`; //We will pass the users
     const response = await fetch(url, {
             method: 'GET',
         });
 
         const propData = await response.json();
-        await displayQCTCoordinates(data.features)
-
-
+        console.log(propData)
+        await displayDetails(propData[0])
 }
+
+
+//
+
+
+//This will fill our display page with the details of the property in question
+async function displayDetails(propData){
+    propLocation.innerHTML = `${propData.address}`
+    propPrice.innerHTML = `$${propData.price}`
+    propSize.innerHTML = `${propData.size_acres}`
+    propType.innerHTML = `${propData.property_type}`
+    propZone.innerHTML = `${propData.zoning}`
+    propTerrain.innerHTML = `${propData.terrain_level}`
+    propUtilities.innerHTML = `${propData.utilities}`
+    propFema.innerHTML = `${propData.fema_zone}`
+    propFeasibility.innerHTML = `${propData.feasibility_score}`
+    QCT_DDA.innerHTML = `${propData.qct_status}`
+    DDA.innerHTML = `${propData.dda_status}`
+    LastUpdated.innerHTML = `${propData.last_updated}`
+}
+
+

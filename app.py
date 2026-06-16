@@ -393,6 +393,18 @@ def get_dda():
     else:
         return {"ok": False}
 
+#This will return to us the property that matches the address submitted in the url get request
+@app.get('/api/addressForProp')
+def get_address_for_prop():
+    address = request.args.get("address") #We will use this to retrieve the address of the property of interest
+    if address:
+        results = list(col_props().find({"address": address}, NO_ID))
+        return jsonify(results)
+    else:
+        return jsonify({})
+
+
+
 
 @app.get("/api/stats")
 def get_stats():
