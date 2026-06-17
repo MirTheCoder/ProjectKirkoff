@@ -93,5 +93,9 @@ https://www.youtube.com/watch?v=wVnimcQsuwk&list=PLGHe6Moaz52PUNP4DtIshALDogSURI
 -Here is the link to the openapi documentation for the hud open source data:
 https://hudgis-hud.opendata.arcgis.com/datasets/77572a4428384d2697c476564dcf53f0_0/api
 
+## GEOCODING API TESTING 
+- Here we are gonna use a temporary replacement for google maps api
+https://geocode.maps.co/
+
 
 
