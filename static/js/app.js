@@ -79,6 +79,7 @@ async function resetFilter(){
 addPropertyForm.addEventListener('submit', async (e) => {
      e.preventDefault();
      let formObj = new FormData(addPropertyForm);
+     let formData = Object.fromEntries(formObj.entries())
      url = `${BACKEND_URL}/api/addProperties`
 
      const response = await fetch(url, {
@@ -86,7 +87,7 @@ addPropertyForm.addEventListener('submit', async (e) => {
             headers: {
             'Content-Type': 'application/json'
             },
-            body: formObj
+            body: JSON.stringify(formData)
         });
 })
 

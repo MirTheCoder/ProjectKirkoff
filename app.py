@@ -15,7 +15,7 @@ from datetime import datetime
 import logging, threading, webbrowser, os
 from fetch_hud_data import fetchLayerQCT
 from fetch_hud_data import fetchLayerDDA
-
+import requests
 
 # ── Logging — prints to terminal in real time ─────────────
 #Here we are establishing pythons basic logging function to set rules for what it should log in the terminal
@@ -32,8 +32,11 @@ app = Flask(__name__) #Initates the backend web Server
 MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/")
 DB_NAME   = os.environ.get("MONGO_DB",  "kirchoff_db")
 GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "") #This is our demo key that has limited usage per day
+MAPSCO_API_KEY = os.environ.get("MAPSCO_API_KEY", "")
 _client   = None
 coordinatesUrl = f"https://maps.googleapis.com/maps/api/geocode/json" #This is our base url for querying coordinates that pertain to an address that is inputted
+coordinatesUrl2 = "https://geocode.maps.co/search"
+
 
 #This function will open up a connection to the database once a request to the database has been made
 #We will also use this to keep that connection open and to reuse the database connection instead
@@ -165,16 +168,29 @@ def get_property_search():
 def add_property():
     data = request.get_json(force=True) #We use this to make sure that flask parses the incoming payload as json
     def flt(k, d=0): return float(str(data.get(k) or d).replace("$","").replace(",","") or d) #This will convert the users text into raw decimal number notation by removing any unwanted characters. Else, it will revert to the value 0 if nothing is inputed
+    resultLat = 41.63
+    resultLng = 72.75
 
     try:
         #We will use this to get the lat and long of the newly added property
-        response = request.get(coordinatesUrl, params={
+        """
+        response = requests.get(coordinatesUrl, params={
             "address": data.get("address", ""),
             "key": GOOGLE_API_KEY
         }, timeout=5) #This will time out after 5 tries
+        """ #We will switch back to the Google Maps api geocoding when we are able to register a card with it
+
+        response = requests.get(coordinatesUrl2, params={
+            "q": data.get("address", ""),
+            "api_key": MAPSCO_API_KEY
+        }, timeout=5)  # This will time out after 5 tries
 
         if(response.status_code == 200):
-            result = response[0].geometry.location #This will get us the coordinates
+            parsedResponse = response.json()
+            print(parsedResponse)  # Using this to see what the output is
+            result = parsedResponse[0] #This will get us the coordinates portion of the JSON response
+            resultLat = result.get("lat")
+            resultLng = result.get("lon")
 
     except Exception as e:
         print('Error getting coordinates: ', e)
@@ -227,8 +243,8 @@ def add_property():
         "dda_status":     qct == "dda",
         "fema_zone":      data.get("fema_zone", "Zone X"),
         "feasibility_score": score,
-        "lat":            flt("lat", 41.63),
-        "lng":            flt("lng", -72.75),
+        "lat":            flt(resultLat, 41.63), #We will pass the lat and lng points we got from our google api into our property
+        "lng":            flt(resultLng, -72.75),
         "image_url":      "/static/images/DefaultBuilding.jpeg", #For now, we will use this building image stored in our system to test out image display
         "last_updated":   datetime.now().strftime("%b %d, %Y %I:%M %p"),
         "zoning_details": None,
