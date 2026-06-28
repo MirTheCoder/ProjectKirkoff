@@ -21,6 +21,12 @@ let QCT_DDA = document.getElementById('QCT_DDA')
 let LastUpdated = document.getElementById('DetailUpdated')
 let DDA = document.getElementById('DDA')
 let addPropertyForm = document.getElementById('addProperty')
+let loginRender = document.getElementById('login')
+let loginOverlay = document.getElementById('loginOverlay')
+let closeLogin = document.getElementById('closeLogin')
+let qctToggle = document.getElementById('qctLayerToggle')
+let ddaToggle = document.getElementById('ddaLayerToggle')
+let floodToggle = document.getElementById('floodLayerToggle')
 
 const BACKEND_URL = 'http://127.0.0.1:5001'; //This assures that our code hits the correct port number
 
@@ -34,6 +40,13 @@ const BACKEND_URL = 'http://127.0.0.1:5001'; //This assures that our code hits t
 
     //This will hold all the qct areas
     const QCTLayers = L.layerGroup().addTo(map)
+
+    //This will hold all the dda areas
+    const DDALayers = L.layerGroup().addTo(map)
+
+
+    //This will hold all our flood zone areas within Connecticut
+    const FloodLayers = L.layerGroup().addTo(map)
 
 //We will load all the properties that we have once the page loads and renders itself
 document.addEventListener('DOMContentLoaded', async () => {
@@ -54,10 +67,53 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await getQCTCoordinates()
     await getDDACoordinates()
+    await getFloodCoordinates()
 
 
 })
 
+//We will use this to add or remove the zone polygon mappings that we have on our map
+qctToggle.addEventListener('change', async (e) => {
+    if(e.target.checked){
+        await getQCTCoordinates()
+    } else {
+        QCTLayers.clearLayers()
+    }
+})
+
+//We will use this to toggle the dda heatmap
+ddaToggle.addEventListener('change', async (e) => {
+    if(e.target.checked){
+        await getDDACoordinates()
+    } else {
+        DDALayers.clearLayers()
+    }
+})
+
+//We will use this to toggle the flood zones heatmap
+floodToggle.addEventListener('change', async (e) => {
+    if(e.target.checked){
+        await getFloodCoordinates()
+    } else {
+        FloodLayers.clearLayers()
+    }
+})
+
+//This will handle rendering the popup login page
+loginRender.addEventListener('click', () => {
+    if(!loginOverlay.classList.contains('active')){
+        loginOverlay.classList.add('active');
+    }
+    closeLogin.addEventListener('click', closeLoginPage);
+})
+
+//This will close the login page
+async function closeLoginPage(){
+    if(loginOverlay.classList.contains('active')){
+        loginOverlay.classList.remove('active');
+    }
+    closeLogin.removeEventListener('click', closeLoginPage) //Remove listener from the close button
+}
 
 
 //We will use this reset button to reset the data the user put within the form to default values along with rendering
@@ -269,6 +325,19 @@ async function getDDACoordinates(){
 }
 
 
+//Our fetch call to backend to get the flood zone coordinates
+async function getFloodCoordinates(){
+    url = `${BACKEND_URL}/api/getFlood`;
+    const response = await fetch(url, {
+            method: 'GET',
+        });
+
+        const data = await response.json();
+        console.log(data)
+        await displayFloodCoordinates(data)
+}
+
+
 
 //This will be the function we use to display the qct areas using their coordinates
 async function displayQCTCoordinates(features){
@@ -313,11 +382,40 @@ let count = 1
             let polygon2 = L.polygon(pointArray, {color: 'orange',
                 fillColor: '#FFA500',
                 fillOpacity: 0.5
-            }).addTo(QCTLayers);
+            }).addTo(DDALayers);
         } catch(err) {
             console.log('Results stop here')
             break;
         }
+    }
+}
+
+
+
+//This will be the function we use to display the flood zone areas using their coordinates
+async function displayFloodCoordinates(features){
+
+    for(const feature of features){
+        let pointArray = []
+    //Grabs all the coordinate points that make up that one qct area
+    try{
+ //Will be used to ensure that we don't run into an error incase the fields we request aren't present
+        points = feature['geometry']['rings'][0]
+
+        for([x,y] of points){
+            pointArray.push([y,x]) //The Leaflet system reads the lat and long in the reverse way that Hud API sends it, so we have to swap each coordinate
+        }
+
+        //We will add the points directly to the
+        let polygon1 = L.polygon(pointArray, {color: 'blue',
+            fillColor: '#ADD8E6',
+            fillOpacity: 0.5
+        }).addTo(FloodLayers);
+    } catch(err){
+        console.log('The results stopped here')
+        break
+    }
+
     }
 }
 

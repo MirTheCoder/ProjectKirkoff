@@ -38,3 +38,18 @@
         color: #5B3E2B;
         text-align: center;
     }
+
+#Save{
+    background: green;
+    color: white;
+}
+
+#notes{
+    background: yellow;
+    color: grey;
+}
+
+#login{
+    height: 40px;
+
+}

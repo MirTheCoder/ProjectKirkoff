@@ -870,6 +870,9 @@
   .text-slate-800 {
     color: var(--color-slate-800);
   }
+  .text-slate-900 {
+    color: var(--color-slate-900);
+  }
   .text-transparent {
     color: transparent;
   }
@@ -1194,6 +1197,17 @@
   font-size: 20px;
   color: #5B3E2B;
   text-align: center;
+}
+#Save {
+  background: green;
+  color: white;
+}
+#notes {
+  background: yellow;
+  color: grey;
+}
+#login {
+  height: 40px;
 }
 @property --tw-scale-x {
   syntax: "*";

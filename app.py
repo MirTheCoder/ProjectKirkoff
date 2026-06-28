@@ -15,6 +15,7 @@ from datetime import datetime
 import logging, threading, webbrowser, os
 from fetch_hud_data import fetchLayerQCT
 from fetch_hud_data import fetchLayerDDA
+from fetch_hud_data import fetchFloodZones
 import requests
 
 # ── Logging — prints to terminal in real time ─────────────
@@ -226,6 +227,13 @@ def add_property():
     #Keeps score within a 5% to 99% percent range
     score = max(5, min(99, score))
 
+    #Putting this in case we can't actually calculate the score due to an unforeseen circumstance
+    if score:
+        score = score
+    else:
+        score = "undefined"
+
+
     prop = {
         "property_id":    prop_id,
         "address":        data.get("address", ""),
@@ -410,6 +418,23 @@ def get_qct():
         return jsonify(coordinates)
     else:
         return {"ok": False}
+
+
+#This function will get us the flood zone areas
+@app.get('/api/getFlood')
+def get_flood():
+    try:
+        #Calling this function in order to receive the first 100 qct areas in Connecticut
+        coordinates = fetchFloodZones()
+    except Exception as err:
+        print("An error occured while fetching Flood Zones: ", err)
+
+    #This is our check to see if the call worked or not
+    if coordinates:
+        return jsonify(coordinates)
+    else:
+        return {"ok": False}
+
 
 #This function will get us the dda area coordinates
 @app.get('/api/getDDA')
