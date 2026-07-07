@@ -27,6 +27,9 @@ let closeLogin = document.getElementById('closeLogin')
 let qctToggle = document.getElementById('qctLayerToggle')
 let ddaToggle = document.getElementById('ddaLayerToggle')
 let floodToggle = document.getElementById('floodLayerToggle')
+let addANote = document.getElementById('notes')
+let noteForm = document.getElementById('noteOverlay')
+let closeNotes = document.getElementById('closeNotes')
 
 const BACKEND_URL = 'http://127.0.0.1:5001'; //This assures that our code hits the correct port number
 
@@ -449,6 +452,7 @@ async function closeDetailPanel(){
     if(!detailPanel.classList.contains('hidden')){
         detailPanel.classList.add('hidden')
     }
+    addANote.removeEventListener('click', seeNoteCard)
     closeDetails.removeEventListener('click', closeDetailPanel)
 }
 
@@ -483,6 +487,30 @@ async function displayDetails(propData){
     QCT_DDA.innerHTML = `${propData.qct_status}`
     DDA.innerHTML = `${propData.dda_status}`
     LastUpdated.innerHTML = `${propData.last_updated}`
+
+    addANote.addEventListener('click', seeNoteCard)
+}
+
+
+async function seeNoteCard(){
+    if(!noteForm.classList.contains('active')){
+        noteForm.classList.add('active')
+        closeNotes.addEventListener('click', closeNotePage)
+    }
+
+    //Using this to get the address element and input the actual address of the property that the users wants to leave a note on
+    let propertyName = noteForm.querySelector('#noteAddress')
+    propertyName.innerHTML = `${propLocation.textContent.trim()}`
+
+
+    addANote.removeEventListener('click', seeNoteCard)
+}
+
+async function closeNotePage(){
+     if(noteForm.classList.contains('active')){
+        noteForm.classList.remove('active')
+        closeNotes.removeEventListener('click', closeNotePage)
+    }
 }
 
 //Sets up variables to receive the required variables needed for turning addresses into lat and long coordinates on the map

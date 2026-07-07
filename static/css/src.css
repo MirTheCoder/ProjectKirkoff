@@ -23,7 +23,7 @@
     background: white;
     padding: 28px 32px;
     border-radius: 14px;
-    width: 340px;
+    max-width: 540px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.2);
     transform: scale(0.9);
     transition: transform 0.25s ease;
@@ -52,4 +52,11 @@
 #login{
     height: 40px;
 
+}
+
+#noteSection{
+    margin-top: 20px;
+    border: 2px solid blue;
+    border-radius: 4px;
+    color: #A9A9A9;
 }
