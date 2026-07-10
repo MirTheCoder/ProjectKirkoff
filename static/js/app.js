@@ -23,7 +23,9 @@ let DDA = document.getElementById('DDA')
 let addPropertyForm = document.getElementById('addProperty')
 let loginRender = document.getElementById('login')
 let loginOverlay = document.getElementById('loginOverlay')
+let accountOverlay = document.getElementById('accountOverlay')
 let closeLogin = document.getElementById('closeLogin')
+let closeAccount = document.getElementById('closeAccount')
 let qctToggle = document.getElementById('qctLayerToggle')
 let ddaToggle = document.getElementById('ddaLayerToggle')
 let floodToggle = document.getElementById('floodLayerToggle')
@@ -83,6 +85,21 @@ qctToggle.addEventListener('change', async (e) => {
         QCTLayers.clearLayers()
     }
 })
+
+createAccount.addEventListener('click', () => {
+    if(!accountOverlay.classList.contains('active')){
+        accountOverlay.classList.add('active')
+    }
+})
+
+//Allows users to close out the account creation pop up box
+closeAccount.addEventListener('click', closeAccountOverlay)
+
+async function closeAccountOverlay(){
+    if(accountOverlay.classList.contains('active')){
+        accountOverlay.classList.remove('active')
+    }
+}
 
 //We will use this to toggle the dda heatmap
 ddaToggle.addEventListener('change', async (e) => {

@@ -8,7 +8,7 @@ Terminal shows every DB read/write in real time.
 """Here we are importing all the required modules to ensure that we can run our application on the web
 as well as make calls to our mongo database (this is where we can put in dummy data for now until we 
 start making actual API calls"""
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, session
 from pymongo import MongoClient, DESCENDING
 from pymongo.errors import DuplicateKeyError
 from datetime import datetime
@@ -53,6 +53,7 @@ def col_props():  return get_db().properties
 def col_notes():  return get_db().notes
 def col_saved():  return get_db().saved_properties
 def col_runs():   return get_db().feasibility_runs   # NEW — saves calculator runs
+def col_users(): return get_db().users #Using this to get the lsit of users with our database
 
 #This prevents our system from sending the objectID assigned to each row in mongodb to the browser to
 #prevent any type errors from coming up
@@ -305,7 +306,7 @@ def get_notes(property_id):
     return jsonify(notes)
 
 #This function will allow users to save properties that they are interested in
-@app.post("/api/saved-properties")
+@app.post("/api/save-properties")
 def save_property():
     body        = request.get_json(force=True)
     property_id = body.get("property_id")
@@ -458,6 +459,28 @@ def get_address_for_prop():
     else:
         return jsonify({})
 
+#We will use this route to log users in in order to give them a more personalized experience
+@app.post('/users/login')
+def login_user():
+    data = request.get_json(force=True)
+    username = data["username"]
+    password = data["password"]
+    user = col_users().find({"username": username, "password": password}, NO_ID)
+    if user:
+        # Here we are storing the users username into a session, only storing if the username is within our system
+        session["user"] = username
+        return render_template("index.html", api_key=GOOGLE_API_KEY, img="/static/images/DefaultBuilding.jpeg", success = "You have successfully logged in")
+    else:
+        return render_template("index.html", api_key=GOOGLE_API_KEY, img="/static/images/DefaultBuilding.jpeg", success="The credentials you provided are invalid")
+
+#This will allow users to create an account so that they can save their information (such as saved properties) under their session
+@app.post('/users/createAccount')
+def create_account():
+    data = request.get_json(force=True)
+    username = data["username"]
+    password = data["password"]
+    col_users().insert_one({"username": username, "password": password})
+
 
 
 
@@ -525,11 +548,11 @@ def _startup_log():
 
 
 #For demo purposes, we may need to edit the code to ensure that the code doesn't auto refresh in order to preserve our api calls
-def open_browser():
-    if os.environ.get("NO_BROWSER") == "1": return
-    webbrowser.open_new("http://127.0.0.1:5001")
+#def open_browser():
+    #if os.environ.get("NO_BROWSER") == "1": return
+    #webbrowser.open_new("http://127.0.0.1:5001")
 
 if __name__ == "__main__": #Run only if launched from this terminal
-    _startup_log()
-    threading.Timer(1.0, open_browser).start()
+    #_startup_log()
+    #threading.Timer(1.0, open_browser).start()
     app.run(debug=True, host="127.0.0.1", port=5001)
