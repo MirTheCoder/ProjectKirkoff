@@ -4,6 +4,7 @@ Three-tier: Browser (JS) → Flask (Python) → MongoDB
 
 Terminal shows every DB read/write in real time.
 """
+import string
 
 """Here we are importing all the required modules to ensure that we can run our application on the web
 as well as make calls to our mongo database (this is where we can put in dummy data for now until we 
@@ -17,6 +18,8 @@ from fetch_hud_data import fetchLayerQCT
 from fetch_hud_data import fetchLayerDDA
 from fetch_hud_data import fetchFloodZones
 import requests
+import random
+from datetime import timedelta
 
 # ── Logging — prints to terminal in real time ─────────────
 #Here we are establishing pythons basic logging function to set rules for what it should log in the terminal
@@ -66,6 +69,15 @@ def _now():
 def _ts():
     return datetime.now().strftime("%H:%M:%S")
 
+#This will be used to generate a random id for each user
+def idGenerator():
+    idVal = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    return idVal
+
+#Allows us to encrypt and decrypt our session data
+app.secret_key = os.environ.get("FLASK_SECRET", "secret")
+app.permanent_session_lifetime = timedelta(seconds=3600) #Session data will be stored for a max of 1 hour unless user logs out
+
 # ── Routes ────────────────────────────────────────────────
 
 #This is our home route which will be where users are directed when they first enter our website
@@ -73,7 +85,11 @@ def _ts():
 def index():
     log.info("SERVE  index.html → browser")
     #We will also send the url to the image within our system to our index.html page
-    return render_template("index.html", api_key=GOOGLE_API_KEY, img="/static/images/DefaultBuilding.jpeg") #We are secretly passing the api key into our index page
+    if "user" in session:
+        username = session["user"]
+        return render_template("index.html", api_key=GOOGLE_API_KEY, img="/static/images/DefaultBuilding.jpeg", username=username)
+    else:
+        return render_template("index.html", api_key=GOOGLE_API_KEY, img="/static/images/DefaultBuilding.jpeg") #We are secretly passing the api key into our index page
 
 
 #Route used to gain the properties from the databasebased off the useers
@@ -465,21 +481,46 @@ def login_user():
     data = request.get_json(force=True)
     username = data["username"]
     password = data["password"]
-    user = col_users().find({"username": username, "password": password}, NO_ID)
-    if user:
+    user = col_users().find_one({"username": username, "password": password}, NO_ID)
+    if user and user != None:
         # Here we are storing the users username into a session, only storing if the username is within our system
+        session.permanent = True #Tells our browser to save the session for an hour
         session["user"] = username
-        return render_template("index.html", api_key=GOOGLE_API_KEY, img="/static/images/DefaultBuilding.jpeg", success = "You have successfully logged in")
+        return jsonify({"ok": True, "user": username}) #We will pass the username to our frontend so that it can render it in the user section
     else:
-        return render_template("index.html", api_key=GOOGLE_API_KEY, img="/static/images/DefaultBuilding.jpeg", success="The credentials you provided are invalid")
+        return jsonify({"ok": False})
+
+#When a user logs out, we will use this route to clear all their session data
+@app.route("/logout")
+def logout():
+    #Only logout if the user is logged in to begin with
+    if "user" in session:
+        session.clear()
+
 
 #This will allow users to create an account so that they can save their information (such as saved properties) under their session
 @app.post('/users/createAccount')
 def create_account():
+    isUnique = False
     data = request.get_json(force=True)
     username = data["username"]
     password = data["password"]
-    col_users().insert_one({"username": username, "password": password})
+
+    #Using this to check and make sure that the user is creating a unique account
+    user = col_users().find_one({"username": username, "password": password})
+    if user and user != None:
+        return jsonify({"ok": False})
+    else:
+        #We will keep generating an ID until a unique one has been made
+        while not isUnique:
+            idVal = idGenerator()
+            findId = col_users().find_one({"userId": idVal})
+            if not findId or findId == None:
+                isUnique = True
+
+        #Finally, we insert the users account info after succesfully verifying it and setting it up (user still has to login though in or
+        col_users().insert_one({"username": username, "password": password, "userId": idVal})
+        return jsonify({"ok": True})
 
 
 

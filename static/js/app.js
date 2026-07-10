@@ -32,6 +32,8 @@ let floodToggle = document.getElementById('floodLayerToggle')
 let addANote = document.getElementById('notes')
 let noteForm = document.getElementById('noteOverlay')
 let closeNotes = document.getElementById('closeNotes')
+let loginForm = document.getElementById('loginForm')
+let accountForm = document.getElementById('accountForm')
 
 const BACKEND_URL = 'http://127.0.0.1:5001'; //This assures that our code hits the correct port number
 
@@ -76,6 +78,57 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 })
+
+//We will use this function to have the username and password combo checked and if it is verified, it will be saved to our users list
+accountForm.addEventListener('submit', async (e) => {
+     e.preventDefault();
+     let formObj = new FormData(accountForm);
+     let formData = Object.fromEntries(formObj.entries())
+     url = `${BACKEND_URL}/api/addProperties`
+    url = BACKEND_URL + '/users/createAccount'
+    const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        });
+
+    //Our check to see whether or not the account creation was successful
+    let data = await response.json();
+
+    if (data.ok) {
+        alert('Your account has been successfully created');
+    } else {
+    alert('Your account is already taken');
+    }
+
+})
+
+//We will use this function to have the user logged in and verify that their credentials are accurate
+loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+     let formObj = new FormData(loginForm);
+     let formData = Object.fromEntries(formObj.entries())
+     url = `${BACKEND_URL}/api/addProperties`
+    url = BACKEND_URL + '/users/login'
+    const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+    });
+
+    //Our check to see whether or not the Login was successful
+    let data = await response.json()
+    if (data.ok) {
+        alert('You have been successfully logged in');
+    } else {
+        alert('The credentials that you have entered are invalid');
+    }
+
+});
 
 //We will use this to add or remove the zone polygon mappings that we have on our map
 qctToggle.addEventListener('change', async (e) => {

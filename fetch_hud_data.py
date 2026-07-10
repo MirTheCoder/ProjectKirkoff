@@ -154,6 +154,5 @@ def fetchFloodZones():
                     time.sleep(0.2)
                     FLOODArray.extend(response["features"]) #We will add every batch of results to the QCTArray
                     break #Doing this for now since the amount of data we have on flood zones is so much that it makes it hard for our computer to render it
-    print("Number of Flood Zones: ", len(FLOODArray))
     return FLOODArray
 
