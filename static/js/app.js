@@ -24,6 +24,7 @@ let addPropertyForm = document.getElementById('addProperty')
 let qctToggle = document.getElementById('qctLayerToggle')
 let ddaToggle = document.getElementById('ddaLayerToggle')
 let floodToggle = document.getElementById('floodLayerToggle')
+let propLabel = document.getElementById('countLabel')
 
 const BACKEND_URL = 'http://127.0.0.1:5001'; //This assures that our code hits the correct port number
 
@@ -47,6 +48,7 @@ const BACKEND_URL = 'http://127.0.0.1:5001'; //This assures that our code hits t
 
 //We will load all the properties that we have once the page loads and renders itself
 document.addEventListener('DOMContentLoaded', async () => {
+    propLabel.textContent = "Loading properties..."
     const response = await fetch(`${BACKEND_URL}/api/propertySearch`, {
             method: 'GET',
         });
@@ -101,7 +103,7 @@ floodToggle.addEventListener('change', async (e) => {
 //all properties
 async function resetFilter(){
     FilterForm.reset();
-
+    propLabel.textContent = "Loading properties..."
     url = `${BACKEND_URL}/api/propertySearch`;
     const response = await fetch(url, {
             method: 'GET',
@@ -156,6 +158,7 @@ for (const [key, value] of Object.entries(queryParams)) {
     }
 }
 
+propLabel.textContent = "Loading properties..."
 // This will add all our search arguments or parameters to the get request
 let url = `${BACKEND_URL}/api/propertyFilter?${searchParams.toString()}`;
 
@@ -173,6 +176,8 @@ let url = `${BACKEND_URL}/api/propertyFilter?${searchParams.toString()}`;
 })
 
 async function loadProperties() {
+
+    propLabel.textContent = "Loading properties..."
     //This will clear all the markers from
     layerGroup.clearLayers();
 
@@ -261,7 +266,10 @@ async function showProperties(data){
 
         });
         detailButtonListener();
+        propLabel.textContent = "Kirchhoff Properties"
     }
+
+
 
 }
 

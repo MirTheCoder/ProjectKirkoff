@@ -139,7 +139,7 @@ logout.addEventListener('click', async () => {
 //This will handle the saved property logic for our system
 saveProp.addEventListener('click', async (e) => {
     let panel = e.target.closest('#detailsPanel');
-    let address = panel.querySelector('#propLocation').textContent.trim(); //This will get us the property of the location
+    let address = panel.querySelector('#DetailAddress').textContent.trim(); //This will get us the property of the location
     //that the user is trying to save
 
     //We will pass it to te backend to see if te property has already been saved, and if the user is logged in
@@ -154,7 +154,15 @@ saveProp.addEventListener('click', async (e) => {
     });
 
     let data = await response.json()
-    if(data.ok){
 
+    //We will use this to write back a response on the status of the action of saving the property for the user
+    if(data.ok){
+        if(data.saved){
+            alert("property has successfully been saved and can be viewed in your saved property list")
+        } else {
+            alert("property is already in your saved list")
+        }
+    } else {
+        alert('Must be logged in to save property')
     }
 })

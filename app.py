@@ -321,31 +321,6 @@ def get_notes(property_id):
     log.info(f"READ   MongoDB.notes       │ property={property_id}  → {len(notes)} notes")
     return jsonify(notes)
 
-#This function will allow users to save properties that they are interested in
-@app.post("/api/save-properties")
-def save_property():
-    body        = request.get_json(force=True)
-    property_id = body.get("property_id")
-    #May want to add a user_id portion here in order to assign the user to the saved property
-
-    if not col_props().find_one({"property_id": property_id}, NO_ID):
-        return jsonify({"ok": False, "message": "Property not found."}), 404
-
-    save_id = f"save_{col_saved().count_documents({})+1:03d}"
-    save = {"save_id": save_id, "user_id": "demo_user_001",
-            "property_id": property_id, "saved_at": _now()}
-
-    #Used to ensure that we are not saving duplicate houses to the same user
-    try:
-        col_saved().insert_one(save)
-        log.info(f"INSERT MongoDB.saved       │ id={save_id}  property={property_id}  user=demo_user_001")
-        msg = "Property saved to your list."
-    except DuplicateKeyError:
-        log.info(f"SKIP   MongoDB.saved       │ property={property_id} already saved — no-op")
-        msg = "Already in your saved list."
-
-    return jsonify({"ok": True, "message": msg})
-
 
 #Used to get the saved properties for a specific user
 @app.get("/api/saved-properties")
@@ -486,6 +461,7 @@ def login_user():
         # Here we are storing the users username into a session, only storing if the username is within our system
         session.permanent = True #Tells our browser to save the session for an hour
         session["user"] = username
+        session["userId"] = user["userId"]
         return jsonify({"ok": True, "user": username}) #We will pass the username to our frontend so that it can render it in the user section
     else:
         return jsonify({"ok": False})
@@ -564,22 +540,32 @@ def get_stats():
     })
 
 #This will handle the logic of saving properties
-@app.post("/api/saveProp")
+@app.post("/users/saveProp")
 def save_prop():
     data = request.get_json(force=True)
     address = data["address"]
+    property = col_props().find_one({"address": address}, NO_ID)
+    propId = property["property_id"]
+
     #We first want to check and see if the user is logged in
     if "user" in session:
         user = session["user"]
+        #How we will give each save property instance a unique id
+        save_id = f"save_{col_saved().count_documents({}) + 1:03d}"
+        save = {"save_id": save_id, "user_id": session["userId"],
+                "property_id": propId, "saved_at": _now()}
+
 
         #Check and see if the property is already saved under the user
-        prop = col_saved().find_one({"user": user, "address": address}, NO_ID)
+        prop = col_saved().find_one({"user": user, "address": address, "property_id": propId}, NO_ID)
 
         #Only insert the property as saved under the user if it hasn't already been saved
         if prop != None or not prop:
-            col_saved().insert_one({"user": user, "address": address})
+            col_saved().insert_one(save)
+            log.info(f"INSERT MongoDB.saved       │ id={save_id}  property={propId}  user=demo_user_001")
             return jsonify({"ok": True, "saved": True})
         else:
+            log.info(f"SKIP   MongoDB.saved       │ property={propId} already saved — no-op")
             return jsonify({"ok": True, "saved": False})
 
     return jsonify({"ok": False})
