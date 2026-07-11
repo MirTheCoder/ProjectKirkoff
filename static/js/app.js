@@ -123,7 +123,9 @@ loginForm.addEventListener('submit', async (e) => {
     //Our check to see whether or not the Login was successful
     let data = await response.json()
     if (data.ok) {
-        alert('You have been successfully logged in');
+        alert('You have been successfully logged in, welcome ', data.username);
+        //Reloads the main page essentially
+        window.location.href = BACKEND_URL
     } else {
         alert('The credentials that you have entered are invalid');
     }
