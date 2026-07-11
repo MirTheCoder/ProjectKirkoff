@@ -496,6 +496,10 @@ def logout():
     #Only logout if the user is logged in to begin with
     if "user" in session:
         session.clear()
+        return jsonify({"ok": True})
+    else:
+        return jsonify({"ok": False})
+
 
 
 #This will allow users to create an account so that they can save their information (such as saved properties) under their session
@@ -559,6 +563,26 @@ def get_stats():
         "recent_runs":  recent_runs,
     })
 
+#This will handle the logic of saving properties
+@app.post("/api/saveProp")
+def save_prop():
+    data = request.get_json(force=True)
+    address = data["address"]
+    #We first want to check and see if the user is logged in
+    if "user" in session:
+        user = session["user"]
+
+        #Check and see if the property is already saved under the user
+        prop = col_saved().find_one({"user": user, "address": address}, NO_ID)
+
+        #Only insert the property as saved under the user if it hasn't already been saved
+        if prop != None or not prop:
+            col_saved().insert_one({"user": user, "address": address})
+            return jsonify({"ok": True, "saved": True})
+        else:
+            return jsonify({"ok": True, "saved": False})
+
+    return jsonify({"ok": False})
 
 # ── Startup ───────────────────────────────────────────────
 
@@ -594,6 +618,6 @@ def _startup_log():
     #webbrowser.open_new("http://127.0.0.1:5001")
 
 if __name__ == "__main__": #Run only if launched from this terminal
-    #_startup_log()
+    _startup_log()
     #threading.Timer(1.0, open_browser).start()
     app.run(debug=True, host="127.0.0.1", port=5001)

@@ -21,19 +21,9 @@ let QCT_DDA = document.getElementById('QCT_DDA')
 let LastUpdated = document.getElementById('DetailUpdated')
 let DDA = document.getElementById('DDA')
 let addPropertyForm = document.getElementById('addProperty')
-let loginRender = document.getElementById('login')
-let loginOverlay = document.getElementById('loginOverlay')
-let accountOverlay = document.getElementById('accountOverlay')
-let closeLogin = document.getElementById('closeLogin')
-let closeAccount = document.getElementById('closeAccount')
 let qctToggle = document.getElementById('qctLayerToggle')
 let ddaToggle = document.getElementById('ddaLayerToggle')
 let floodToggle = document.getElementById('floodLayerToggle')
-let addANote = document.getElementById('notes')
-let noteForm = document.getElementById('noteOverlay')
-let closeNotes = document.getElementById('closeNotes')
-let loginForm = document.getElementById('loginForm')
-let accountForm = document.getElementById('accountForm')
 
 const BACKEND_URL = 'http://127.0.0.1:5001'; //This assures that our code hits the correct port number
 
@@ -79,59 +69,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 })
 
-//We will use this function to have the username and password combo checked and if it is verified, it will be saved to our users list
-accountForm.addEventListener('submit', async (e) => {
-     e.preventDefault();
-     let formObj = new FormData(accountForm);
-     let formData = Object.fromEntries(formObj.entries())
-     url = `${BACKEND_URL}/api/addProperties`
-    url = BACKEND_URL + '/users/createAccount'
-    const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-            'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-        });
-
-    //Our check to see whether or not the account creation was successful
-    let data = await response.json();
-
-    if (data.ok) {
-        alert('Your account has been successfully created');
-    } else {
-    alert('Your account is already taken');
-    }
-
-})
-
-//We will use this function to have the user logged in and verify that their credentials are accurate
-loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-     let formObj = new FormData(loginForm);
-     let formData = Object.fromEntries(formObj.entries())
-     url = `${BACKEND_URL}/api/addProperties`
-    url = BACKEND_URL + '/users/login'
-    const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-            'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
-    });
-
-    //Our check to see whether or not the Login was successful
-    let data = await response.json()
-    if (data.ok) {
-        alert('You have been successfully logged in, welcome ', data.username);
-        //Reloads the main page essentially
-        window.location.href = BACKEND_URL
-    } else {
-        alert('The credentials that you have entered are invalid');
-    }
-
-});
-
 //We will use this to add or remove the zone polygon mappings that we have on our map
 qctToggle.addEventListener('change', async (e) => {
     if(e.target.checked){
@@ -140,21 +77,6 @@ qctToggle.addEventListener('change', async (e) => {
         QCTLayers.clearLayers()
     }
 })
-
-createAccount.addEventListener('click', () => {
-    if(!accountOverlay.classList.contains('active')){
-        accountOverlay.classList.add('active')
-    }
-})
-
-//Allows users to close out the account creation pop up box
-closeAccount.addEventListener('click', closeAccountOverlay)
-
-async function closeAccountOverlay(){
-    if(accountOverlay.classList.contains('active')){
-        accountOverlay.classList.remove('active')
-    }
-}
 
 //We will use this to toggle the dda heatmap
 ddaToggle.addEventListener('change', async (e) => {
@@ -173,22 +95,6 @@ floodToggle.addEventListener('change', async (e) => {
         FloodLayers.clearLayers()
     }
 })
-
-//This will handle rendering the popup login page
-loginRender.addEventListener('click', () => {
-    if(!loginOverlay.classList.contains('active')){
-        loginOverlay.classList.add('active');
-    }
-    closeLogin.addEventListener('click', closeLoginPage);
-})
-
-//This will close the login page
-async function closeLoginPage(){
-    if(loginOverlay.classList.contains('active')){
-        loginOverlay.classList.remove('active');
-    }
-    closeLogin.removeEventListener('click', closeLoginPage) //Remove listener from the close button
-}
 
 
 //We will use this reset button to reset the data the user put within the form to default values along with rendering
@@ -564,26 +470,7 @@ async function displayDetails(propData){
 }
 
 
-async function seeNoteCard(){
-    if(!noteForm.classList.contains('active')){
-        noteForm.classList.add('active')
-        closeNotes.addEventListener('click', closeNotePage)
-    }
 
-    //Using this to get the address element and input the actual address of the property that the users wants to leave a note on
-    let propertyName = noteForm.querySelector('#noteAddress')
-    propertyName.innerHTML = `${propLocation.textContent.trim()}`
-
-
-    addANote.removeEventListener('click', seeNoteCard)
-}
-
-async function closeNotePage(){
-     if(noteForm.classList.contains('active')){
-        noteForm.classList.remove('active')
-        closeNotes.removeEventListener('click', closeNotePage)
-    }
-}
 
 //Sets up variables to receive the required variables needed for turning addresses into lat and long coordinates on the map
 
