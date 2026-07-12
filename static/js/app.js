@@ -26,7 +26,8 @@ let ddaToggle = document.getElementById('ddaLayerToggle')
 let floodToggle = document.getElementById('floodLayerToggle')
 let propLabel = document.getElementById('countLabel')
 let statsOverlay = document.getElementById('statsOverlay')
-
+let statsButton = document.getElementById('dbStats')
+let closeStats = document.getElementById('closeStatsBtn')
 
 const BACKEND_URL = 'http://127.0.0.1:5001'; //This assures that our code hits the correct port number
 
@@ -72,6 +73,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 })
+
+//Handles logic of opening the stats page
+statsButton.addEventListener('click', () => {
+    if(!statsOverlay.classList.contains('active')){
+        statsOverlay.classList.add('active')
+    }
+});
+
+//This will close the stats page for us, but we will add an event listener only if the button is actually rendered and active
+if(closeStats){
+    closeStats.addEventListener('click', () => {
+        if(statsOverlay.classList.contains('active')){
+            statsOverlay.classList.remove('active')
+        }
+    })
+}
 
 //We will use this to add or remove the zone polygon mappings that we have on our map
 qctToggle.addEventListener('change', async (e) => {
