@@ -25,6 +25,8 @@ let qctToggle = document.getElementById('qctLayerToggle')
 let ddaToggle = document.getElementById('ddaLayerToggle')
 let floodToggle = document.getElementById('floodLayerToggle')
 let propLabel = document.getElementById('countLabel')
+let statsOverlay = document.getElementById('statsOverlay')
+
 
 const BACKEND_URL = 'http://127.0.0.1:5001'; //This assures that our code hits the correct port number
 
@@ -456,7 +458,7 @@ async function getPropViaAddress(propdata){
 }
 
 
-//
+
 
 
 //This will fill our display page with the details of the property in question

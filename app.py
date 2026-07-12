@@ -378,7 +378,7 @@ def feasibility():
         "message": f"Feasibility: {label} ({score}%)",
     })
 
-
+#Potentially will institute a feasiblity run option where users can run a feasibility calculation on
 @app.post("/api/feasibility/save")
 def save_feasibility_run():
     """Persist a feasibility calculator run to MongoDB."""
@@ -512,7 +512,7 @@ def get_stats():
     props_n  = col_props().count_documents({})
     notes_n  = col_notes().count_documents({})
     saved_n  = col_saved().count_documents({})
-    runs_n   = col_runs().count_documents({})
+    #runs_n   = col_runs().count_documents({}) "We will implement this once we start doing actual user side feasibility runs"
 
     #Shows us the amount of high, medium, and low fesability scores
     high   = col_props().count_documents({"feasibility_score": {"$gte": 70}})
@@ -527,16 +527,16 @@ def get_stats():
     #We get the most recent values for notes, saved properties, and runs as well
     recent_notes = list(col_notes().find({}, NO_ID).sort("created_at", DESCENDING).limit(5))
     recent_saved = list(col_saved().find({}, NO_ID).sort("saved_at",  DESCENDING).limit(5))
-    recent_runs  = list(col_runs().find({},  NO_ID).sort("created_at",DESCENDING).limit(5))
+    #recent_runs  = list(col_runs().find({},  NO_ID).sort("created_at",DESCENDING).limit(5)) "Will also implement this once the feasibility runs on user side are done"
 
-    log.info(f"READ   MongoDB.stats        │ props={props_n}  notes={notes_n}  saved={saved_n}  runs={runs_n}")
+    log.info(f"READ   MongoDB.stats        │ props={props_n}  notes={notes_n}  saved={saved_n}  runs= 0") #Make sure to include or add back "runs={run_n}" once you are done implementing feasibility check
     return jsonify({
-        "counts":  {"properties": props_n, "notes": notes_n, "saved": saved_n, "feasibility_runs": runs_n},
+        "counts":  {"properties": props_n, "notes": notes_n, "saved": saved_n, "feasibility_runs": 0}, #Make sure to include or add back "'feasibility_runs':{run_n}" once you are done implementing feasibility check
         "feasibility_dist": {"high": high, "medium": medium, "low": low_n},
         "hud_dist":  {"qct": qct_n, "dda": dda_n, "none": none_n},
         "recent_notes": recent_notes,
         "recent_saved": recent_saved,
-        "recent_runs":  recent_runs,
+        "recent_runs":  0, #Rember to insert recent_runs once you implement the feasibility runs user side logic
     })
 
 #This will handle the logic of saving properties
