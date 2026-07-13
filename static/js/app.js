@@ -28,6 +28,19 @@ let propLabel = document.getElementById('countLabel')
 let statsOverlay = document.getElementById('statsOverlay')
 let statsButton = document.getElementById('dbStats')
 let closeStats = document.getElementById('closeStatsBtn')
+let numProps = document.getElementById('stat-num-properties')
+let numNotes = document.getElementById('stat-num-notes')
+let numSaved = document.getElementById('stat-num-saved')
+let highFeas = document.getElementById('stat-high-feasibility')
+let mediumFeas = document.getElementById('stat-medium-feasibility')
+let lowFeas = document.getElementById('stat-low-feasibility')
+let feasRuns = document.getElementById('stat-feasibility-runs')
+let numQCT = document.getElementById('stat-qct-areas')
+let numDDA = document.getElementById('stat-dda-areas')
+let numNone = document.getElementById('stat-none-areas')
+let recentSaves = document.getElementById('stat-recent-saves')
+let recentNotes = document.getElementById('stat-recent-notes')
+let recentRuns = document.getElementById('stat-recent-runs')
 
 const BACKEND_URL = 'http://127.0.0.1:5001'; //This assures that our code hits the correct port number
 
@@ -75,8 +88,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 })
 
 //Handles logic of opening the stats page
-statsButton.addEventListener('click', () => {
+statsButton.addEventListener('click', async () => {
     if(!statsOverlay.classList.contains('active')){
+        //This function right here will have our backend display data regarding different amounts of data we have for
+        //varying categories
+        populateStats();
         statsOverlay.classList.add('active')
     }
 });
@@ -494,6 +510,40 @@ async function displayDetails(propData){
     LastUpdated.innerHTML = `${propData.last_updated}`
 
     addANote.addEventListener('click', seeNoteCard)
+}
+
+//We will use this function to get the required statistics and populate the stats board with it
+async function populateStats(){
+    const response = await fetch(`${BACKEND_URL}/api/stats`, {
+            method: 'GET',
+        });
+
+        const data = await response.json();
+
+        //Separating the arrays within our json data in order to make it easier to access the data when we populate the stats overlay
+        counts = data.counts
+        feasibility = data.feasibility_dist
+        hudStats = data.hud_dist
+
+        console.log("counts: ", counts)
+        console.log("feasibility: ", feasibility)
+        console.log("hudStats: ", hudStats)
+
+        numProps.textContent = counts.properties
+        numNotes.textContent = counts.notes
+        numSaved.textContent = counts.saved
+        feasRuns.textContent = counts.feasibility_runs
+        highFeas.textContent = feasibility.high
+        mediumFeas.textContent = feasibility.medium
+        lowFeas.textContent = feasibility.low
+        numQCT.textContent = hudStats.qct
+        numDDA.textContent = hudStats.dda
+        numNone.textContent = hudStats.none
+        recentNotes.textContent = data.recent_notes.length
+        recentSaves.textContent = data.recent_saved.length
+        recentRuns.textContent = data.recent_runs
+
+
 }
 
 
