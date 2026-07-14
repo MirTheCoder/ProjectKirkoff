@@ -325,12 +325,24 @@ def get_notes(property_id):
 #Used to get the saved properties for a specific user
 @app.get("/api/saved-properties")
 def get_saved_properties():
-    #Gets the property_ids that are saved under the user, making sure not to return the objectID
-    saved_ids = [s["property_id"] for s in col_saved().find({"user_id": "demo_user_001"}, NO_ID)]
-    #Collects all the properties that have a match to any of the property ids in the list
-    props     = list(col_props().find({"property_id": {"$in": saved_ids}}, NO_ID))
-    log.info(f"READ   MongoDB.saved       │ user=demo_user_001  → {len(props)} saved properties")
-    return jsonify(props)
+    #First we always want to check and make sure that the user is in session
+    if("user" in session):
+        userId = session["userId"] #Obtaining the user Id we will use to obtain the properties that are saved by the user
+        user = session["user"]
+        #Gets the property_ids that are saved under the user, making sure not to return the objectID
+        savedProps = list(col_saved().find({"user_id": userId}, NO_ID))
+
+        #Using this to get the property ids for the list of saved properties for the user (we will use this to get and record the properties themselves)
+        propIdList = []
+        for prop in savedProps:
+            propIdList.append(prop.get("property_id"))
+
+        #Collects all the properties that have a match to any of the property ids in the list
+        props     = list(col_props().find({"property_id": {"$in": propIdList}}, NO_ID))
+        log.info(f"READ   MongoDB.saved       │ user={user}  → {len(props)} saved properties")
+        return jsonify({"ok": True, "props": props})
+    else:
+        return jsonify({"ok": False, "message": "User not found."})
 
 #Function is used to calculate the fesabilty of a property
 @app.post("/api/feasibility")

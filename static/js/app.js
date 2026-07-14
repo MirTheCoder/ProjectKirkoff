@@ -42,6 +42,7 @@ let recentSaves = document.getElementById('stat-recent-saves')
 let recentNotes = document.getElementById('stat-recent-notes')
 let recentRuns = document.getElementById('stat-recent-runs')
 
+
 const BACKEND_URL = 'http://127.0.0.1:5001'; //This assures that our code hits the correct port number
 
 //Using this to create our free map which will be centered at east berlin CT, these are the coordinates for berlin Connecticut

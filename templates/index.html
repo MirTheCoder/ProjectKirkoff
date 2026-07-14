@@ -445,7 +445,7 @@
 </div>
 
 
-      <button onclick="openSavedPanel()"
+      <button id="seeSavedProps"
               class="px-3 py-1.5 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg shadow-sm transition-all">
         ☆ Saved
       </button>
@@ -739,6 +739,49 @@
   </button>
 </div>
 </aside>
+
+<aside id="savedPropSection" class="w-96 bg-white border-l border-slate-200 shadow-xl transition-all hidden z-30 flex flex-col h-full" style="overflow-y: auto !important">
+  <div class="p-4 pb-0">
+    <img src="{{ url_for('static', filename='images/DefaultBuilding.jpeg') }}"
+         alt="Property Image"
+         class="w-full h-48 object-cover rounded-lg shadow-sm" />
+  </div>
+
+  <div class="p-6 flex-1 overflow-y-auto space-y-6">
+
+    <div>
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-400" id="savedPropLocation">Location</span>
+      <h4 id="savedPropAddress" class="text-xl font-bold text-slate-800 mt-1"></h4>
+    </div>
+  </div>
+
+  <hr class="border-slate-100" />
+
+    <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl">
+      <div>
+        <span class="block text-xs font-medium text-slate-500 uppercase" >Price</span>
+        <p id="savedPropPrice" class="text-lg font-bold text-emerald-600 mt-0.5"></p>
+      </div>
+      <div>
+        <span class="block text-xs font-medium text-slate-500 uppercase">Size (Acres)</span>
+        <p id="SavedPropSize" class="text-lg font-bold text-slate-800 mt-0.5"></p>
+      </div>
+    </div>
+
+  <hr class="border-slate-100" />
+
+  <div class="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-end gap-5">
+  <button id="closeSavePage" type="button" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium text-sm rounded-lg transition-colors cursor-pointer">
+    Close
+  </button>
+
+   <button id="removeProp" type="button" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium text-sm rounded-lg transition-colors cursor-pointer">
+    Remove
+  </button>
+</div>
+</aside>
+
+
   </main>
 
   <div id="modalLayer" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden"></div>

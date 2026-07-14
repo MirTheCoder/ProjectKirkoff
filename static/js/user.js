@@ -10,6 +10,11 @@ let closeLogin = document.getElementById('closeLogin')
 let closeAccount = document.getElementById('closeAccount')
 let logout = document.getElementById('logout')
 let saveProp = document.getElementById('Save')
+let seeSavedProps = document.getElementById('seeSavedProps')
+let savedProp = document.getElementById('savedPropSection')
+let savedPropPrice = document.getElementById('savedPropPrice')
+let SavedPropSize = document.getElementById('SavedPropSize')
+let savedPropAddress = document.getElementById('savedPropAddress')
 
 //We will use this function to have the username and password combo checked and if it is verified, it will be saved to our users list
 accountForm.addEventListener('submit', async (e) => {
@@ -136,6 +141,20 @@ logout.addEventListener('click', async () => {
     window.location.reload()
 })
 
+seeSavedProps.addEventListener('click', async () => {
+    url = BACKEND_URL + '/api/saved-properties'
+    const response = await fetch(url, {
+            method: 'GET',
+    });
+
+    data = await response.json();
+    if(data.ok){
+        await displaySavedProps(data.props)
+    } else {
+        alert('You need to be logged in, in order to view your saved Properties')
+    }
+})
+
 //This will handle the saved property logic for our system
 saveProp.addEventListener('click', async (e) => {
     let panel = e.target.closest('#detailsPanel');
@@ -166,3 +185,64 @@ saveProp.addEventListener('click', async (e) => {
         alert('Must be logged in to save property')
     }
 })
+
+//This function will display all the users saved properties
+async function displaySavedProps(props){
+    if(props.length > 0){
+        savedPropSection.innerHTML = ``
+        props.forEach(prop => {
+            let savedDiv = document.createElement('div')
+            savedDiv.innerHTML = `<div class="p-4 pb-0">
+                <img src="/static/images/DefaultBuilding.jpeg"
+                     alt="Property Image"
+                     class="w-full h-48 object-cover rounded-lg shadow-sm" />
+                </div>
+
+              <div class="p-6 flex-1 overflow-y-auto space-y-6">
+
+                <div>
+                  <span class="text-xs font-semibold uppercase tracking-wider text-slate-400" id="savedPropLocation">Location</span>
+                  <h4 id="savedPropAddress" class="text-xl font-bold text-slate-800 mt-1">${prop.address}</h4>
+                </div>
+              </div>
+
+              <hr class="border-slate-100" />
+
+                <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl">
+                  <div>
+                    <span class="block text-xs font-medium text-slate-500 uppercase" >Price</span>
+                    <p id="savedPropPrice" class="text-lg font-bold text-emerald-600 mt-0.5">${prop.price}</p>
+                  </div>
+                  <div>
+                    <span class="block text-xs font-medium text-slate-500 uppercase">Size (Acres)</span>
+                    <p id="SavedPropSize" class="text-lg font-bold text-slate-800 mt-0.5">${prop.size_acres}</p>
+                  </div>
+                </div>
+
+              <hr class="border-slate-100" />
+
+              <div class="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-end gap-5">
+              <button id="closeSavePage" type="button" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium text-sm rounded-lg transition-colors cursor-pointer">
+                Close
+              </button>
+
+               <button id="removeProp" type="button" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium text-sm rounded-lg transition-colors cursor-pointer">
+                Remove
+              </button>
+            </div>`
+
+        savedPropSection.appendChild(savedDiv)
+
+        if(savedPropSection.classList.contains('hidden')){
+            savedPropSection.classList.remove('hidden')
+        }
+        })
+    } else {
+        savedPropSection.innerHTML = "You have no properties saved at this time"
+
+        if(savedPropSection.classList.contains('hidden')){
+            savedPropSection.classList.remove('hidden')
+        }
+    }
+
+}
